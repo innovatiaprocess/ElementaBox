@@ -33,7 +33,7 @@
 
         const Icons = {
             ElementaLogo: (p) => (
-                <img src="https://lh3.googleusercontent.com/d/1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" {...p} />
+                <img src="https://lh3.googleusercontent.com/d/1CDtlPBzeohniETytbfVOI43VMmk_vQTn" alt="Elementa Logo" {...p} />
             ),
             Home: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
             Play: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>,
@@ -255,7 +255,10 @@
                         <div className="orb-aura aura-air"></div>
                     </div>
                     {/* Logo libre sin recuadros */}
-                    <img src="https://lh3.googleusercontent.com/d/1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" className="w-56 h-56 sm:w-72 sm:h-72 object-contain animate-float relative z-10" />
+                    {/* Contenedor que recorta la imagen a un círculo perfecto */}
+                    <div className="w-48 h-48 sm:w-64 sm:h-64 relative z-10 animate-float rounded-full overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.3)] border-4 border-[#E5D3BD]/50">
+                        <img src="https://lh3.googleusercontent.com/d/1CDtlPBzeohniETytbfVOI43VMmk_vQTn" alt="Elementa Logo" className="w-full h-full object-cover scale-[1.05]" />
+                    </div>
                 </div>
                 
                 <div className="text-brand-dark font-black uppercase tracking-[0.3em] text-sm animate-pulse flex flex-col items-center gap-3">
@@ -628,10 +631,10 @@
             };
 
             const Topbar = () => (
-                <div className="sticky top-0 z-[100] bg-brand-bg1/95 backdrop-blur-xl px-6 py-4 flex justify-between items-center shadow-sm border-b border-brand-dark/10">
-                    <div className="flex items-center gap-2">
-                        <div className="bg-brand-dark p-1.5 rounded-lg shadow-lg">
-                            <ElementaLogo className="w-7 h-7 object-contain" />
+                <div className="flex items-center gap-3">
+                        {/* Contenedor circular estricto que recorta las esquinas cuadradas */}
+                        <div className="w-10 h-10 rounded-full shadow-md overflow-hidden border border-brand-dark/10 shrink-0 bg-brand-dark flex items-center justify-center">
+                            <ElementaLogo className="w-full h-full object-cover scale-[1.10]" />
                         </div>
                         <span className="font-black text-xl tracking-widest uppercase text-brand-dark">Elementa</span>
                     </div>
@@ -734,10 +737,14 @@
                         {!user && (currentView === 'login' || currentView === 'register') && (
                             <div className="flex flex-col items-center justify-center animate-slide-up py-10">
                                 <div className="mb-10 flex flex-col items-center w-full">
-                                    <div className="w-48 h-48 sm:w-56 sm:h-56 mb-6 relative flex items-center justify-center">
-                                        {/* Brillo suave de fondo para darle profundidad sin bordes duros */}
-                                        <div className="absolute inset-0 bg-brand-dark/10 blur-3xl rounded-3xl z-0"></div>
-                                        <img src="https://lh3.googleusercontent.com/d/1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" className="w-full h-full object-contain animate-float relative z-10 drop-shadow-2xl" />
+                                    <div className="w-40 h-40 sm:w-48 sm:h-48 mb-6 relative flex items-center justify-center animate-float">
+                                        {/* Sombra base suave */}
+                                        <div className="absolute inset-0 bg-brand-dark/30 blur-2xl rounded-full z-0 translate-y-6 scale-90"></div>
+                                        
+                                        {/* Contenedor circular con borde del mismo color del fondo para fusionarse */}
+                                        <div className="relative z-10 w-full h-full rounded-full overflow-hidden shadow-2xl border-[6px] border-[#E5D3BD]">
+                                            <ElementaLogo className="w-full h-full object-cover scale-[1.05]" />
+                                        </div>
                                     </div>
                                     <h1 className="text-5xl font-black uppercase tracking-[0.2em] text-brand-dark drop-shadow-md text-center">Elementa</h1>
                                     <h2 className="text-lg font-bold tracking-[0.5em] text-brand-dark/60 mt-2 text-center">TRAINING BOX</h2>
