@@ -33,18 +33,7 @@
 
         const Icons = {
             ElementaLogo: (p) => (
-                <svg {...p} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="50" cy="50" r="46" stroke="currentColor" strokeWidth="6"/>
-                    <path d="M12 25 L88 88" stroke="currentColor" strokeWidth="6" strokeLinecap="round"/>
-                    <path d="M12 75 L88 12" stroke="currentColor" strokeWidth="6" strokeLinecap="round"/>
-                    <path d="M50 14 C58 24 64 30 64 40 C64 48 58 50 50 50 C42 50 36 48 36 40 C36 30 42 24 50 14 Z" fill="currentColor"/>
-                    <path d="M50 24 C54 30 58 34 58 40 C58 44 54 46 50 46 C46 46 42 44 42 40 C42 34 46 30 50 24 Z" fill="currentColor"/>
-                    <path d="M60 55 C70 50 78 50 85 58 C85 68 75 70 65 75 C60 77 55 75 60 55 Z" fill="currentColor"/>
-                    <path d="M65 65 C70 62 75 62 80 65 C80 68 75 70 68 70 C65 70 63 68 65 65 Z" fill="currentColor"/>
-                    <path d="M35 85 L50 60 L65 85 Z" fill="currentColor"/>
-                    <path d="M42 85 L50 72 L58 85 Z" fill="currentColor"/>
-                    <path d="M20 50 C30 45 40 45 45 50 M15 60 C25 55 35 55 40 60 M25 40 C32 37 38 37 42 40" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
-                </svg>
+                <img src="https://drive.google.com/uc?export=view&id=1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" {...p} />
             ),
             Home: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
             Play: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>,
@@ -107,7 +96,6 @@
             color: #854d0e;
         }
 
-        /* Colores exactos para el Nivel Oficial (Sólido) y Nivel Pendiente (Outline) */
         .bg-band-azul { background-color: #3b82f6; color: white; border-color: #3b82f6; }
         .bg-band-verde { background-color: #22c55e; color: white; border-color: #22c55e; }
         .bg-band-morada { background-color: #9333ea; color: white; border-color: #9333ea; }
@@ -123,7 +111,6 @@
         .border-band-sin { border-color: #eab308; color: #eab308; box-shadow: inset 0 0 8px rgba(234, 179, 8, 0.2); }
         `;
 
-        // URL DE APPS SCRIPT OFICIAL ACTUALIZADA
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRNhYyhiWShaATM3XS2pvAufqmKnUlSvIrT8nLg_i9RrlSxtJXUGIJGORvaFs2QA/exec";
 
         const OPCIONES_OBSERVACION = [
@@ -190,12 +177,10 @@
             return { type: null, id: null };
         };
 
-        // PARSER PARA CONVERTIR ENLACES DE GOOGLE DRIVE A IMÁGENES MOSTRABLES (MEJORADO PARA EVITAR CORS)
         const getDirectImageUrl = (url) => {
             if (!url) return null;
             if (url.includes('drive.google.com')) {
                 const match = url.match(/[-\w]{25,}/);
-                // lh3.googleusercontent.com funciona mejor para extraer imágenes públicas de Drive en etiquetas <img>
                 if (match) return `https://lh3.googleusercontent.com/d/${match[0]}`;
             }
             return url;
@@ -242,9 +227,14 @@
         };
 
         const GlobalLoader = () => (
-            <div className="fixed inset-0 z-[99999] bg-[#E5D3BD] flex flex-col items-center justify-center animate-fade-in">
-                <video src="https://drive.google.com/uc?export=download&id=1_6UqArGQtjN-61mWhs5MoAy1QlBzZoMA" autoPlay loop muted playsInline className="w-64 h-64 object-contain mix-blend-multiply mb-6 pointer-events-none"></video>
-                <div className="text-brand-dark font-black uppercase tracking-widest text-lg animate-pulse flex items-center gap-2 bg-white/30 px-6 py-2 rounded-full backdrop-blur-sm shadow-sm">
+            <div className="fixed inset-0 z-[999999] bg-[#E5D3BD]/95 backdrop-blur-md flex flex-col items-center justify-center animate-fade-in" style={{ pointerEvents: 'all' }}>
+                <div className="relative flex items-center justify-center mb-10">
+                    <div className="absolute inset-0 bg-white/60 blur-3xl rounded-full animate-pulse scale-150"></div>
+                    <div className="absolute w-40 h-40 border-t-4 border-b-4 border-brand-dark rounded-full animate-spin"></div>
+                    <div className="absolute w-48 h-48 border-r-4 border-l-4 border-brand-dark/30 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '3s' }}></div>
+                    <img src="https://drive.google.com/uc?export=view&id=1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" className="w-32 h-32 object-contain drop-shadow-2xl animate-pulse relative z-10" />
+                </div>
+                <div className="text-brand-dark font-black uppercase tracking-widest text-lg animate-pulse flex items-center gap-3 bg-white/80 px-8 py-3 rounded-full backdrop-blur-md shadow-xl border border-white">
                     <div className="w-5 h-5 border-4 border-brand-dark border-t-transparent rounded-full animate-spin"></div>
                     Sincronizando...
                 </div>
@@ -278,7 +268,7 @@
             const [maxSkills, setMaxSkills] = useState(defaultSkills);
             const [pendingSkills, setPendingSkills] = useState({});
             const [history, setHistory] = useState([]);
-            const [selectedHistoryItem, setSelectedHistoryItem] = useState(null); // Nuevo estado para el modal del historial
+            const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
 
             const [adminTab, setAdminTab] = useState('evidencias'); 
             const [adminSheetData, setAdminSheetData] = useState([]);
@@ -436,12 +426,12 @@
             const handleFileChange = (e) => {
                 const files = Array.from(e.target.files);
                 if(files.length > 0) { 
-                    const newFiles = files.map(file => ({
+                    const newFiles = files.map((file) => ({
                         url: URL.createObjectURL(file),
                         type: file.type,
                         originalFile: file
                     }));
-                    setPreviewFiles(prev => [...prev, ...newFiles]); 
+                    setPreviewFiles((prev) => [...prev, ...newFiles]); 
                     setErrorMsg(''); 
                 } 
             };
@@ -482,7 +472,7 @@
                 const res = await apiCall('submitEvidence', { correo: user.correo || user.email, reto: `Ver video: ${selectedVideo.Nombre || 'Academia'}`, puntos: 1, archivos: [] });
                 if (res.status === 'success') {
                     setSuccessMsg('Puntos asignados exitosamente.');
-                    await loadAppData(user); // Espera a que los datos se recarguen
+                    await loadAppData(user); 
                     setLoading(false);
                     setTimeout(() => { setSelectedVideo(null); setSuccessMsg(''); }, 1500);
                 } else { 
@@ -491,7 +481,7 @@
                 }
             };
 
-            const handleSkillUpdate = (movimiento, valor) => { setUserSkills(prev => ({...prev, [movimiento]: valor})); };
+            const handleSkillUpdate = (movimiento, valor) => { setUserSkills((prev) => ({...prev, [movimiento]: valor})); };
 
             const handleAdminValidateEvidence = async (e, estadoDecision) => {
                 e.preventDefault(); 
@@ -516,7 +506,7 @@
                 });
                 
                 if (res.status === 'success') { 
-                    setAdminEvidencias(prev => prev.filter(ev => ev._rowIndex !== adminEvalEvidencia._rowIndex));
+                    setAdminEvidencias((prev) => prev.filter((ev) => ev._rowIndex !== adminEvalEvidencia._rowIndex));
                     setAdminEvalEvidencia(null); 
                     setSuccessMsg(`Evidencia ${estadoDecision.toLowerCase()} correctamente. Puntos actualizados.`);
                     setTimeout(() => setSuccessMsg(''), 4000);
@@ -551,33 +541,40 @@
 
             const groupedFilteredVideos = useMemo(() => {
                 const lowerSearch = String(searchTerm || '').toLowerCase();
-                const filtered = videos?.filter(v => String(getProp(v, 'Nombre') || '').toLowerCase().includes(lowerSearch) || String(getProp(v, 'Descripcion') || '').toLowerCase().includes(lowerSearch)) || [];
+                const filtered = videos?.filter((v) => String(getProp(v, 'Nombre') || '').toLowerCase().includes(lowerSearch) || String(getProp(v, 'Descripcion') || '').toLowerCase().includes(lowerSearch)) || [];
                 return filtered.reduce((acc, v) => {
                     const cat = getProp(v, 'Categoria') || 'General';
                     if (!acc[cat]) acc[cat] = []; acc[cat].push(v); return acc;
                 }, {});
             }, [videos, searchTerm]);
 
-            const toggleCategory = (cat) => setExpandedCategories(prev => ({ ...prev, [cat]: !prev[cat] }));
+            const toggleCategory = (cat) => setExpandedCategories((prev) => ({ ...prev, [cat]: !prev[cat] }));
 
-            // Función para renderizar botones de evidencia limpios en el Panel Admin
             const renderEvidenceLinks = (urlStr) => {
                 if (!urlStr) return <div className="text-brand-dark/50 font-bold text-xs">Sin Evidencia Adjunta</div>;
-                if (urlStr.includes('Error')) return <div className="text-red-500 font-bold text-[10px] p-2 bg-red-100 rounded border border-red-200">Error al procesar la imagen.</div>;
-                if (urlStr === 'Generado Automático') return <div className="text-brand-dark/50 font-bold text-xs bg-black/5 px-4 py-2 rounded-xl">Validación automática (Video)</div>;
+                if (urlStr === 'Generado Automático') return <div className="text-brand-dark/50 font-bold text-xs bg-black/5 px-4 py-2 rounded-xl">Validación automática del Sistema</div>;
 
-                const links = urlStr.split('\n').filter(l => l.trim() !== '');
-                return links.map((lnk, idx) => (
-                    <a key={idx} href={lnk} target="_blank" rel="noopener noreferrer" className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-black text-[10px] uppercase hover:bg-blue-200 transition-colors flex items-center justify-center gap-1.5 shadow-sm border border-blue-200">
-                        <ExternalLink className="w-3 h-3"/> Ver Archivo {idx + 1}
-                    </a>
-                ));
+                const links = urlStr.split(/[\n,\|]+/).filter((l) => l.trim() !== '');
+                if (links.length === 0) return <div className="text-brand-dark/50 font-bold text-xs">Evidencia Inválida</div>;
+
+                return links.map((lnk, idx) => {
+                    if (lnk.includes('Error')) {
+                        return <div key={idx} className="text-red-500 font-bold text-[10px] p-2 bg-red-100 rounded border border-red-200 mt-1">Archivo {idx + 1}: {lnk}</div>;
+                    }
+                    return (
+                        <a key={idx} href={lnk.trim()} target="_blank" rel="noopener noreferrer" className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-black text-[10px] uppercase hover:bg-blue-200 transition-colors flex items-center justify-center gap-1.5 shadow-sm border border-blue-200 shrink-0 mt-1">
+                            <ExternalLink className="w-3 h-3"/> Ver Archivo {idx + 1}
+                        </a>
+                    );
+                });
             };
 
             const Topbar = () => (
                 <div className="sticky top-0 z-[100] bg-brand-bg1/95 backdrop-blur-xl px-6 py-4 flex justify-between items-center shadow-sm border-b border-brand-dark/10">
                     <div className="flex items-center gap-2">
-                        <div className="bg-brand-dark p-2 rounded-lg shadow-lg"><ElementaLogo className="w-6 h-6 text-brand-bg1" /></div>
+                        <div className="bg-brand-dark p-1.5 rounded-lg shadow-lg">
+                            <ElementaLogo className="w-7 h-7 object-contain" />
+                        </div>
                         <span className="font-black text-xl tracking-widest uppercase text-brand-dark">Elementa</span>
                     </div>
                     {user && (
@@ -588,7 +585,6 @@
                 </div>
             );
 
-            // ENCABEZADO COMPRIMIDO Y RE-DISEÑADO
             const ProfileSuperCard = () => (
                 <div className="sticky top-[76px] z-[90] glass-card rounded-[2rem] p-3.5 flex flex-col gap-3.5 border border-white/60 shadow-lg mb-4 transition-all">
                     <div className="flex justify-between items-center">
@@ -641,20 +637,20 @@
             const BottomNav = () => (
                 <div className="fixed bottom-0 left-0 w-full bg-brand-dark backdrop-blur-lg shadow-[0_-10px_40px_rgba(0,0,0,0.2)] z-[99999] border-t-2 border-brand-bg2 pb-[env(safe-area-inset-bottom)]">
                     <div className="flex justify-between items-center max-w-md mx-auto p-3 px-6">
-                        {['home', 'wod', 'academy', 'blog'].map(view => {
+                        {['home', 'wod', 'academy', 'blog'].map((view) => {
                             const isApp = currentView === view;
                             const icons = { home: Home, wod: Calendar, academy: Video, blog: BookOpen };
                             const labels = { home: 'Home', wod: 'WOD', academy: 'Videos', blog: 'Eventos' };
                             const Icon = icons[view];
                             return (
-                                <button key={view} onClick={() => handleNavigation(view)} className={`relative flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${isApp ? 'text-brand-bg1 scale-110' : 'text-white/50 hover:text-white/80'}`}>
+                                <button key={view} disabled={dataLoading} onClick={() => { if(!dataLoading) handleNavigation(view); }} className={`relative flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${isApp ? 'text-brand-bg1 scale-110' : 'text-white/50 hover:text-white/80'} ${dataLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                     <Icon className="w-6 h-6" />
                                     <span className="text-[9px] font-black uppercase tracking-widest">{labels[view]}</span>
                                 </button>
                             );
                         })}
                         {user?.role === 'admin' && (
-                            <button onClick={() => handleNavigation('admin')} className={`relative flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${currentView === 'admin' ? 'text-brand-bg1 scale-110' : 'text-white/50 hover:text-white/80'}`}>
+                            <button onClick={() => { if(!dataLoading) handleNavigation('admin'); }} disabled={dataLoading} className={`relative flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${currentView === 'admin' ? 'text-brand-bg1 scale-110' : 'text-white/50 hover:text-white/80'} ${dataLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                 <Database className="w-6 h-6" />
                                 <span className="text-[9px] font-black uppercase tracking-widest">Admin</span>
                             </button>
@@ -680,7 +676,9 @@
                         {!user && (currentView === 'login' || currentView === 'register') && (
                             <div className="flex flex-col items-center justify-center animate-slide-up py-10">
                                 <div className="mb-8 flex flex-col items-center">
-                                    <div className="w-24 h-24 rounded-full bg-brand-dark flex items-center justify-center shadow-2xl mb-4 border-4 border-brand-dark/10"><ElementaLogo className="w-16 h-16 text-brand-bg1" /></div>
+                                    <div className="w-24 h-24 rounded-full bg-brand-dark flex items-center justify-center shadow-2xl mb-4 border-4 border-brand-dark/10 overflow-hidden p-3">
+                                        <ElementaLogo className="w-full h-full object-contain" />
+                                    </div>
                                     <h1 className="text-4xl font-black uppercase tracking-widest text-brand-dark drop-shadow-sm">Elementa</h1>
                                     <h2 className="text-xl font-medium tracking-[0.4em] text-brand-dark/70">TRAINING BOX</h2>
                                 </div>
@@ -769,51 +767,53 @@
                                                 {movimientosGimnasia.map((mov, idx) => {
                                                     const isOfficialMax = maxSkills[mov];
                                                     return (
-                                                    <div key={idx} className="bg-white/60 p-3.5 sm:p-4 rounded-2xl border border-brand-dark/10 shadow-sm flex flex-col gap-3">
-                                                        <div className="flex justify-between items-start">
-                                                            <h4 className="font-black text-xs text-brand-dark uppercase tracking-wider">{mov}</h4>
-                                                            <div className="flex flex-col items-end gap-1 max-w-[60%] text-right">
-                                                                {maxSkills[mov] && maxSkills[mov] !== 'azul' && (
-                                                                    <span className="text-[8px] font-black uppercase tracking-widest text-brand-dark/40 bg-black/5 px-2 py-0.5 rounded">PR Oficial: {nivelesGimnasiaList.find(n => n.color === maxSkills[mov])?.label || 'Banda Azul'}</span>
-                                                                )}
-                                                                {pendingSkills[mov] && gimLevels.indexOf(pendingSkills[mov]) > gimLevels.indexOf(maxSkills[mov] || 'azul') && (
-                                                                    <span className="text-[8px] font-black uppercase tracking-widest text-orange-700 bg-orange-100 px-2 py-0.5 rounded border border-orange-200 flex items-center gap-1 shadow-sm leading-tight">
-                                                                        <Clock className="w-2.5 h-2.5 shrink-0"/> En validación: {nivelesGimnasiaList.find(n => n.color === pendingSkills[mov])?.label}
-                                                                    </span>
-                                                                )}
+                                                        <div key={idx} className="bg-white/60 p-3.5 sm:p-4 rounded-2xl border border-brand-dark/10 shadow-sm flex flex-col gap-3">
+                                                            <div className="flex justify-between items-start">
+                                                                <h4 className="font-black text-xs text-brand-dark uppercase tracking-wider">{mov}</h4>
+                                                                <div className="flex flex-col items-end gap-1 max-w-[60%] text-right">
+                                                                    {maxSkills[mov] && maxSkills[mov] !== 'azul' && (
+                                                                        <span className="text-[8px] font-black uppercase tracking-widest text-brand-dark/40 bg-black/5 px-2 py-0.5 rounded">PR Oficial: {nivelesGimnasiaList.find(n => n.color === maxSkills[mov])?.label || 'Banda Azul'}</span>
+                                                                    )}
+                                                                    {pendingSkills[mov] && gimLevels.indexOf(pendingSkills[mov]) > gimLevels.indexOf(maxSkills[mov] || 'azul') && (
+                                                                        <span className="text-[8px] font-black uppercase tracking-widest text-orange-700 bg-orange-100 px-2 py-0.5 rounded border border-orange-200 flex items-center gap-1 shadow-sm leading-tight">
+                                                                            <Clock className="w-2.5 h-2.5 shrink-0"/> En validación: {nivelesGimnasiaList.find(n => n.color === pendingSkills[mov])?.label}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center justify-between bg-black/5 p-2 rounded-full border border-black/5 mt-1 relative">
+                                                                {nivelesGimnasiaList.map((nv) => {
+                                                                    const isActive = userSkills[mov] === nv.color;
+                                                                    const isMaxOfficial = maxSkills[mov] === nv.color;
+                                                                    
+                                                                    let btnClass = "w-7 h-7 sm:w-8 sm:h-8 rounded-full transition-all duration-300 relative group flex items-center justify-center ";
+                                                                    
+                                                                    if (isMaxOfficial) {
+                                                                        btnClass += `bg-band-${nv.color} shadow-lg scale-110 z-10 border-2 border-transparent`;
+                                                                    } else if (isActive) {
+                                                                        btnClass += `bg-transparent border-band-${nv.color} border-[3px] border-dashed scale-110 videogame-active z-10`;
+                                                                    } else {
+                                                                        btnClass += `bg-black/10 border-2 border-transparent opacity-40 hover:opacity-100 grayscale hover:grayscale-0 hover:scale-110`;
+                                                                    }
+
+                                                                    return (
+                                                                        <button 
+                                                                            key={nv.color}
+                                                                            onClick={() => handleSkillUpdate(mov, nv.color)}
+                                                                            className={btnClass}
+                                                                            title={`${nv.nivel}: ${nv.label}`}
+                                                                        >
+                                                                            {isActive && <CheckCircle className={`w-4 h-4 drop-shadow-md z-20 absolute ${isMaxOfficial ? 'text-white' : `text-${nv.color}-600`}`}/>}
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                            <div className="text-[9px] font-black text-center uppercase tracking-widest text-brand-dark/50">
+                                                                Nivel a Solicitar: {userSkills[mov] ? nivelesGimnasiaList.find(n => n.color === userSkills[mov])?.label : 'Sin Nivel'}
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center justify-between bg-black/5 p-2 rounded-full border border-black/5 mt-1 relative">
-                                                            {nivelesGimnasiaList.map(nv => {
-                                                                const isActive = userSkills[mov] === nv.color;
-                                                                const isMaxOfficial = maxSkills[mov] === nv.color;
-                                                                
-                                                                let btnClass = "w-7 h-7 sm:w-8 sm:h-8 rounded-full transition-all duration-300 relative group flex items-center justify-center ";
-                                                                
-                                                                if (isMaxOfficial) {
-                                                                    btnClass += `bg-band-${nv.color} shadow-lg scale-110 z-10 border-2 border-transparent`;
-                                                                } else if (isActive) {
-                                                                    btnClass += `bg-transparent border-band-${nv.color} border-[3px] border-dashed scale-110 videogame-active z-10`;
-                                                                } else {
-                                                                    btnClass += `bg-black/10 border-2 border-transparent opacity-40 hover:opacity-100 grayscale hover:grayscale-0 hover:scale-110`;
-                                                                }
-
-                                                                return (
-                                                                <button 
-                                                                    key={nv.color}
-                                                                    onClick={() => handleSkillUpdate(mov, nv.color)}
-                                                                    className={btnClass}
-                                                                    title={`${nv.nivel}: ${nv.label}`}
-                                                                >
-                                                                    {isActive && <CheckCircle className={`w-4 h-4 drop-shadow-md z-20 absolute ${isMaxOfficial ? 'text-white' : `text-${nv.color}-600`}`}/>}
-                                                                </button>
-                                                            )})}
-                                                        </div>
-                                                        <div className="text-[9px] font-black text-center uppercase tracking-widest text-brand-dark/50">
-                                                            Nivel a Solicitar: {userSkills[mov] ? nivelesGimnasiaList.find(n => n.color === userSkills[mov])?.label : 'Sin Nivel'}
-                                                        </div>
-                                                    </div>
-                                                )})}
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     )}
@@ -827,31 +827,33 @@
                                             <p className="text-[10px] font-bold text-brand-dark/60 bg-white/50 p-3 rounded-xl leading-tight">Si rompes tu PR oficial (+5lb o más), solicita validación para tus puntos subiendo tu video aquí.</p>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                                                {movimientosLevantamiento.map((mov, idx) => (
-                                                    <div key={idx} className="bg-white/60 p-4 rounded-2xl border border-brand-dark/10 flex items-center justify-between gap-3 shadow-sm hover:bg-white/80 transition-colors flex-wrap">
-                                                        <div className="flex flex-col flex-1 items-start">
-                                                            <h4 className="font-black text-xs text-brand-dark uppercase tracking-wider leading-tight">{mov}</h4>
-                                                            <span className="text-[9px] font-black text-brand-dark/40 uppercase mt-0.5 mb-1 flex items-center gap-1">
-                                                                PR Oficial: <strong className={`${maxSkills[mov] > 0 ? 'text-brand-bg1 bg-brand-dark px-1.5 py-0.5 rounded shadow-sm' : ''}`}>{maxSkills[mov] || 0} LBS</strong>
-                                                            </span>
-                                                            {pendingSkills[mov] > (maxSkills[mov] || 0) && (
-                                                                <span className="text-[8px] font-black uppercase tracking-widest text-orange-700 bg-orange-100 px-2 py-0.5 rounded border border-orange-200 flex items-center gap-1 shadow-sm mt-1">
-                                                                    <Clock className="w-2.5 h-2.5"/> En validación: {pendingSkills[mov]} LBS
+                                                {movimientosLevantamiento.map((mov, idx) => {
+                                                    return (
+                                                        <div key={idx} className="bg-white/60 p-4 rounded-2xl border border-brand-dark/10 flex items-center justify-between gap-3 shadow-sm hover:bg-white/80 transition-colors flex-wrap">
+                                                            <div className="flex flex-col flex-1 items-start">
+                                                                <h4 className="font-black text-xs text-brand-dark uppercase tracking-wider leading-tight">{mov}</h4>
+                                                                <span className="text-[9px] font-black text-brand-dark/40 uppercase mt-0.5 mb-1 flex items-center gap-1">
+                                                                    PR Oficial: <strong className={`${maxSkills[mov] > 0 ? 'text-brand-bg1 bg-brand-dark px-1.5 py-0.5 rounded shadow-sm' : ''}`}>{maxSkills[mov] || 0} LBS</strong>
                                                                 </span>
-                                                            )}
+                                                                {pendingSkills[mov] > (maxSkills[mov] || 0) && (
+                                                                    <span className="text-[8px] font-black uppercase tracking-widest text-orange-700 bg-orange-100 px-2 py-0.5 rounded border border-orange-200 flex items-center gap-1 shadow-sm mt-1">
+                                                                        <Clock className="w-2.5 h-2.5"/> En validación: {pendingSkills[mov]} LBS
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex items-center gap-1 w-24 sm:w-28 bg-white p-1 rounded-xl border border-brand-dark/20 focus-within:border-brand-dark/60 transition-colors shadow-inner shrink-0">
+                                                                <input 
+                                                                    type="number" 
+                                                                    placeholder="0" 
+                                                                    value={userSkills[mov] !== undefined ? userSkills[mov] : ''}
+                                                                    onChange={(e) => handleSkillUpdate(mov, e.target.value)}
+                                                                    className="w-full p-2 bg-transparent outline-none font-black text-center text-brand-dark text-lg sm:text-xl" 
+                                                                />
+                                                                <span className="text-[8px] font-black uppercase text-brand-dark/50 pr-2">LBS</span>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex items-center gap-1 w-24 sm:w-28 bg-white p-1 rounded-xl border border-brand-dark/20 focus-within:border-brand-dark/60 transition-colors shadow-inner shrink-0">
-                                                            <input 
-                                                                type="number" 
-                                                                placeholder="0" 
-                                                                value={userSkills[mov] !== undefined ? userSkills[mov] : ''}
-                                                                onChange={(e) => handleSkillUpdate(mov, e.target.value)}
-                                                                className="w-full p-2 bg-transparent outline-none font-black text-center text-brand-dark text-lg sm:text-xl" 
-                                                            />
-                                                            <span className="text-[8px] font-black uppercase text-brand-dark/50 pr-2">LBS</span>
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     )}
@@ -878,14 +880,16 @@
                                                 history.map((item, idx) => {
                                                     const isApproved = String(item.Estado).toLowerCase() === 'aprobado';
                                                     const isRejected = String(item.Estado).toLowerCase() === 'rechazado';
+                                                    const statusColor = isApproved ? 'bg-green-500' : isRejected ? 'bg-red-500' : 'bg-orange-500';
+                                                    const statusBadgeColor = isApproved ? 'bg-green-500/20 text-green-400 border-green-500/30' : isRejected ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-orange-500/20 text-orange-400 border-orange-500/30';
                                                     
                                                     return (
                                                         <div key={idx} onClick={() => setSelectedHistoryItem(item)} className="bg-brand-dark text-brand-bg1 rounded-xl p-3 shadow-sm border border-brand-bg2/20 flex flex-col gap-1.5 relative overflow-hidden group hover:scale-[1.02] transition-transform cursor-pointer">
-                                                            <div className={`absolute left-0 top-0 w-1.5 h-full ${isApproved ? 'bg-green-500' : isRejected ? 'bg-red-500' : 'bg-orange-500'}`}></div>
+                                                            <div className={`absolute left-0 top-0 w-1.5 h-full ${statusColor}`}></div>
                                                             
                                                             <div className="flex justify-between items-center pl-2">
                                                                 <h4 className="font-black text-[10px] sm:text-xs uppercase leading-tight pr-2 drop-shadow-sm truncate">{item.Reto}</h4>
-                                                                <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap tracking-widest ${isApproved ? 'bg-green-500/20 text-green-400 border border-green-500/30' : isRejected ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'}`}>
+                                                                <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap tracking-widest border ${statusBadgeColor}`}>
                                                                     {item.Estado}
                                                                 </span>
                                                             </div>
@@ -961,18 +965,20 @@
                                                 <p className="font-bold text-brand-dark/60 text-sm">No hay entrenamientos cargados.</p>
                                             </div>
                                         ) : (
-                                            wodsList.map((wod, idx) => (
-                                                <div key={idx} className="glass-card rounded-[1.5rem] p-6 border border-brand-dark/10 shadow-md relative overflow-hidden group">
-                                                    <div className="absolute top-0 left-0 w-2 h-full bg-brand-dark"></div>
-                                                    <div className="flex justify-between items-start mb-4">
-                                                        <h3 className="text-2xl font-black uppercase text-brand-dark">{getProp(wod, 'Titulo') || 'WOD'}</h3>
-                                                        <span className="text-xs font-bold text-brand-dark/50 bg-white/50 px-3 py-1 rounded-full">{formatearFecha(getProp(wod, 'Fecha'))}</span>
+                                            wodsList.map((wod, idx) => {
+                                                return (
+                                                    <div key={idx} className="glass-card rounded-[1.5rem] p-6 border border-brand-dark/10 shadow-md relative overflow-hidden group">
+                                                        <div className="absolute top-0 left-0 w-2 h-full bg-brand-dark"></div>
+                                                        <div className="flex justify-between items-start mb-4">
+                                                            <h3 className="text-2xl font-black uppercase text-brand-dark">{getProp(wod, 'Titulo') || 'WOD'}</h3>
+                                                            <span className="text-xs font-bold text-brand-dark/50 bg-white/50 px-3 py-1 rounded-full">{formatearFecha(getProp(wod, 'Fecha'))}</span>
+                                                        </div>
+                                                        <div className="bg-white/40 p-5 rounded-xl font-medium text-brand-dark/90 whitespace-pre-wrap leading-relaxed border border-white/50 text-sm">
+                                                            {getProp(wod, 'Descripcion') || 'Sin descripción'}
+                                                        </div>
                                                     </div>
-                                                    <div className="bg-white/40 p-5 rounded-xl font-medium text-brand-dark/90 whitespace-pre-wrap leading-relaxed border border-white/50 text-sm">
-                                                        {getProp(wod, 'Descripcion') || 'Sin descripción'}
-                                                    </div>
-                                                </div>
-                                            ))
+                                                );
+                                            })
                                         )}
 
                                         <div className="pt-4 border-t-2 border-brand-dark/10">
@@ -981,27 +987,28 @@
                                                 {retosList?.map((reto, idx) => {
                                                     if(!reto) return null;
                                                     const titulo = String(getProp(reto, 'Titulo') || '').toUpperCase();
-                                                    const isAutoReto = titulo.includes('VIDEO') || titulo.includes('NIVEL') || titulo.includes('BANDA');
+                                                    const isAutoReto = titulo.includes('VIDEO') || titulo.includes('NIVEL') || titulo.includes('BANDA') || titulo.includes('MARCA');
                                                     
                                                     return (
-                                                    <div key={idx} className="bg-white/60 p-5 rounded-2xl border border-brand-dark/5 flex flex-col h-full shadow-sm">
-                                                        <div className="flex justify-between items-start mb-2">
-                                                            <h4 className="font-black uppercase text-sm leading-tight text-brand-dark pr-2">{getProp(reto, 'Titulo') || 'Reto'}</h4>
-                                                            <span className="bg-green-100 text-green-700 font-black text-[10px] px-2 py-1 rounded-full uppercase tracking-wider border border-green-200 shrink-0">+{getProp(reto, 'Puntos') || 0} Pts</span>
-                                                        </div>
-                                                        <p className="text-xs font-bold text-brand-dark/60 mb-4 flex-1 leading-relaxed">{getProp(reto, 'Descripcion') || ''}</p>
-                                                        {isAutoReto ? (
-                                                            <div className="w-full bg-orange-100/50 text-orange-800/70 py-2.5 rounded-xl font-black text-[9px] uppercase text-center border border-orange-200/50 flex flex-col items-center justify-center gap-1">
-                                                                <CheckCircle className="w-4 h-4"/>
-                                                                Asignación Automática desde Home/Videos
+                                                        <div key={idx} className="bg-white/60 p-5 rounded-2xl border border-brand-dark/5 flex flex-col h-full shadow-sm">
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <h4 className="font-black uppercase text-sm leading-tight text-brand-dark pr-2">{getProp(reto, 'Titulo') || 'Reto'}</h4>
+                                                                <span className="bg-green-100 text-green-700 font-black text-[10px] px-2 py-1 rounded-full uppercase tracking-wider border border-green-200 shrink-0">+{getProp(reto, 'Puntos') || 0} Pts</span>
                                                             </div>
-                                                        ) : (
-                                                            <button onClick={() => setUploadingReto({ Titulo: getProp(reto, 'Titulo'), Puntos: getProp(reto, 'Puntos') })} className="w-full bg-brand-dark text-brand-bg1 py-2.5 rounded-xl font-black text-[10px] uppercase shadow-md flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform">
-                                                                <Upload className="w-4 h-4"/> Subir Evidencia
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                )})}
+                                                            <p className="text-xs font-bold text-brand-dark/60 mb-4 flex-1 leading-relaxed">{getProp(reto, 'Descripcion') || ''}</p>
+                                                            {isAutoReto ? (
+                                                                <div className="w-full bg-orange-100/50 text-orange-800/70 py-2.5 rounded-xl font-black text-[9px] uppercase text-center border border-orange-200/50 flex flex-col items-center justify-center gap-1">
+                                                                    <CheckCircle className="w-4 h-4"/>
+                                                                    Asignación Automática desde Home/Videos
+                                                                </div>
+                                                            ) : (
+                                                                <button onClick={() => setUploadingReto({ Titulo: getProp(reto, 'Titulo'), Puntos: getProp(reto, 'Puntos') })} className="w-full bg-brand-dark text-brand-bg1 py-2.5 rounded-xl font-black text-[10px] uppercase shadow-md flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform">
+                                                                    <Upload className="w-4 h-4"/> Subir Evidencia
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     </div>
@@ -1022,56 +1029,60 @@
                                 </div>
                                 {dataLoading ? <Loader /> : (
                                     <div className="space-y-4">
-                                        {Object.keys(groupedFilteredVideos).map((category, catIdx) => (
-                                            <div key={catIdx} className="glass-card rounded-[1.5rem] overflow-hidden border border-white/40 shadow-sm">
-                                                <button onClick={() => toggleCategory(category)} className="w-full p-5 flex justify-between items-center hover:bg-white/40 transition-colors">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="bg-brand-dark text-brand-bg1 w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shadow-inner">{groupedFilteredVideos[category].length}</div>
-                                                        <h3 className="font-black text-lg uppercase tracking-wider">Categoría {category}</h3>
-                                                    </div>
-                                                    {expandedCategories[category] ? <ChevronUp className="w-5 h-5 opacity-50"/> : <ChevronDown className="w-5 h-5 opacity-50"/>}
-                                                </button>
-                                                {expandedCategories[category] && (
-                                                    <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-6 bg-black/5 animate-fade-in border-t border-white/20">
-                                                        {groupedFilteredVideos[category].map((vid, vIdx) => {
-                                                            const videoInfo = getVideoData(getProp(vid, 'URL') || '');
-                                                            const videoTitle = getProp(vid, 'Nombre') || '';
-                                                            const retoName = `Ver video: ${videoTitle}`;
-                                                            const isCompleted = history.some(h => h.Reto === retoName && String(h.Estado).toLowerCase() === 'aprobado');
-                                                            
-                                                            return (
-                                                                <div key={vIdx} onClick={() => !isCompleted && setSelectedVideo({ ...videoInfo, Nombre: videoTitle })} className={`bg-white rounded-3xl overflow-hidden shadow-sm border border-brand-dark/5 flex flex-col group relative ${isCompleted ? 'opacity-70 cursor-default' : 'cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300'}`}>
-                                                                    <div className="relative aspect-video bg-brand-dark flex items-center justify-center overflow-hidden">
-                                                                        {videoInfo.type === 'youtube' ? (
-                                                                            <img src={`https://img.youtube.com/vi/${videoInfo.id}/hqdefault.jpg`} className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105" alt={videoTitle} />
-                                                                        ) : (
-                                                                            <Video className="w-12 h-12 text-white/30" />
-                                                                        )}
-                                                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300"></div>
-                                                                        
-                                                                        {!isCompleted && (
-                                                                            <div className="relative z-10 w-16 h-16 bg-brand-bg1/95 rounded-full flex items-center justify-center shadow-xl backdrop-blur-md group-hover:scale-110 group-hover:bg-brand-bg1 transition-all duration-300">
-                                                                                <Play className="w-8 h-8 text-brand-dark translate-x-0.5" />
-                                                                            </div>
-                                                                        )}
-                                                                        {isCompleted && (
-                                                                            <div className="absolute inset-0 bg-green-500/20 flex flex-col items-center justify-center backdrop-blur-[2px] z-20">
-                                                                                <CheckCircle className="w-12 h-12 text-green-500 bg-white rounded-full mb-2" />
-                                                                                <span className="bg-green-600 text-white font-black uppercase text-[10px] px-3 py-1 rounded-full shadow-md">Completado</span>
-                                                                            </div>
-                                                                        )}
+                                        {Object.keys(groupedFilteredVideos).map((category, catIdx) => {
+                                            return (
+                                                <div key={catIdx} className="glass-card rounded-[1.5rem] overflow-hidden border border-white/40 shadow-sm">
+                                                    <button onClick={() => toggleCategory(category)} className="w-full p-5 flex justify-between items-center hover:bg-white/40 transition-colors">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="bg-brand-dark text-brand-bg1 w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shadow-inner">{groupedFilteredVideos[category].length}</div>
+                                                            <h3 className="font-black text-lg uppercase tracking-wider">Categoría {category}</h3>
+                                                        </div>
+                                                        {expandedCategories[category] ? <ChevronUp className="w-5 h-5 opacity-50"/> : <ChevronDown className="w-5 h-5 opacity-50"/>}
+                                                    </button>
+                                                    {expandedCategories[category] && (
+                                                        <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-6 bg-black/5 animate-fade-in border-t border-white/20">
+                                                            {groupedFilteredVideos[category].map((vid, vIdx) => {
+                                                                const videoInfo = getVideoData(getProp(vid, 'URL') || '');
+                                                                const videoTitle = getProp(vid, 'Nombre') || '';
+                                                                const retoName = `Ver video: ${videoTitle}`;
+                                                                const isCompleted = history.some(h => h.Reto === retoName && String(h.Estado).toLowerCase() === 'aprobado');
+                                                                
+                                                                return (
+                                                                    <div key={vIdx} onClick={() => setSelectedVideo({ ...videoInfo, Nombre: videoTitle, isCompleted })} className={`bg-white rounded-3xl overflow-hidden shadow-sm border border-brand-dark/5 flex flex-col group relative cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${isCompleted ? 'opacity-75' : ''}`}>
+                                                                        <div className="relative aspect-video bg-brand-dark flex items-center justify-center overflow-hidden">
+                                                                            {videoInfo.type === 'youtube' ? (
+                                                                                <img src={`https://img.youtube.com/vi/${videoInfo.id}/hqdefault.jpg`} className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105" alt={videoTitle} />
+                                                                            ) : (
+                                                                                <Video className="w-12 h-12 text-white/30" />
+                                                                            )}
+                                                                            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300"></div>
+                                                                            
+                                                                            {!isCompleted && (
+                                                                                <div className="relative z-10 w-16 h-16 bg-brand-bg1/95 rounded-full flex items-center justify-center shadow-xl backdrop-blur-md group-hover:scale-110 group-hover:bg-brand-bg1 transition-all duration-300">
+                                                                                    <Play className="w-8 h-8 text-brand-dark translate-x-0.5" />
+                                                                                </div>
+                                                                            )}
+                                                                            {isCompleted && (
+                                                                                <div className="absolute inset-0 bg-green-500/20 flex flex-col items-center justify-center backdrop-blur-[2px] z-20 transition-all duration-300">
+                                                                                    <div className="relative z-10 w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-xl backdrop-blur-md group-hover:scale-110 transition-all duration-300 mb-2">
+                                                                                        <Play className="w-8 h-8 text-white translate-x-0.5" />
+                                                                                    </div>
+                                                                                    <span className="bg-green-600 text-white font-black uppercase text-[10px] px-3 py-1 rounded-full shadow-md">Completado</span>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="p-5 flex-1 flex flex-col">
+                                                                            <h4 className="font-black text-xl leading-tight uppercase mb-2 text-brand-dark">{videoTitle}</h4>
+                                                                            <p className="text-sm text-brand-dark/70 font-medium line-clamp-2 mt-auto">{getProp(vid, 'Descripcion') || ''}</p>
+                                                                        </div>
                                                                     </div>
-                                                                    <div className="p-5 flex-1 flex flex-col">
-                                                                        <h4 className="font-black text-xl leading-tight uppercase mb-2 text-brand-dark">{videoTitle}</h4>
-                                                                        <p className="text-sm text-brand-dark/70 font-medium line-clamp-2 mt-auto">{getProp(vid, 'Descripcion') || ''}</p>
-                                                                    </div>
-                                                                </div>
-                                                            )
-                                                        })}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>
@@ -1113,7 +1124,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                            )
+                                            );
                                         })}
                                     </div>
                                 )}
@@ -1160,7 +1171,7 @@
                                                             </div>
                                                             <button onClick={() => setEditingPayment(row)} className="shrink-0 w-full sm:w-auto bg-brand-dark text-brand-bg1 px-4 py-2.5 rounded-xl font-black text-[10px] uppercase shadow-md hover:scale-105 flex items-center justify-center gap-2"><Activity className="w-4 h-4"/> Editar Estado</button>
                                                         </div>
-                                                    )
+                                                    );
                                                 })}
                                             </div>
                                         )}
@@ -1182,9 +1193,11 @@
                                                 <div className="mb-4">
                                                     <h4 className="text-[10px] font-black uppercase text-brand-dark/50 mb-1">Detalle de Solicitud</h4>
                                                     <div className="space-y-1.5 max-h-40 overflow-y-auto hide-scroll p-3 bg-white/50 rounded-xl border border-brand-dark/10">
-                                                        {String(getProp(adminEvalEvidencia, 'Reto') || '').split(' | ').map((line, j) => (
-                                                            <p key={j} className="text-xs font-black text-brand-dark uppercase border-b border-brand-dark/5 pb-1 last:border-0">{line}</p>
-                                                        ))}
+                                                        {String(getProp(adminEvalEvidencia, 'Reto') || '').split(' | ').map((line, j) => {
+                                                            return (
+                                                                <p key={j} className="text-xs font-black text-brand-dark uppercase border-b border-brand-dark/5 pb-1 last:border-0">{line}</p>
+                                                            );
+                                                        })}
                                                     </div>
                                                     <p className="text-sm font-bold text-brand-dark/70 mt-2 flex items-center gap-1"><Users className="w-4 h-4"/> {getProp(adminEvalEvidencia, 'Correo')}</p>
                                                 </div>
@@ -1198,7 +1211,11 @@
                                                         <label className="block text-[10px] font-black uppercase mb-1">Observación al Atleta (Obligatorio si se rechaza)</label>
                                                         <select name="observacion" className="w-full p-3.5 rounded-xl bg-white font-bold outline-none border border-brand-dark/10 shadow-sm text-sm">
                                                             <option value="">-- Selecciona una Observación Prediseñada --</option>
-                                                            {OPCIONES_OBSERVACION.map((o, i) => <option key={i} value={o}>{o}</option>)}
+                                                            {OPCIONES_OBSERVACION.map((o, i) => {
+                                                                return (
+                                                                    <option key={i} value={o}>{o}</option>
+                                                                );
+                                                            })}
                                                         </select>
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-3 pt-4 border-t border-brand-dark/10">
@@ -1215,23 +1232,26 @@
                                                     adminEvidencias.map((ev, i) => {
                                                         if (!ev) return null;
                                                         return (
-                                                        <div key={i} className="bg-white/60 p-4 rounded-2xl border border-brand-dark/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm">
-                                                            <div className="flex-1 min-w-0 pr-4">
-                                                                <div className="flex items-center gap-2 mb-1.5">
-                                                                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-orange-100 text-orange-700`}>{getProp(ev, 'Estado') || 'Pendiente'}</span>
-                                                                    <span className="text-[10px] font-black uppercase text-brand-dark/50">{formatearFecha(getProp(ev, 'Fecha'))}</span>
+                                                            <div key={i} className="bg-white/60 p-4 rounded-2xl border border-brand-dark/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm">
+                                                                <div className="flex-1 min-w-0 pr-4">
+                                                                    <div className="flex items-center gap-2 mb-1.5">
+                                                                        <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-orange-100 text-orange-700`}>{getProp(ev, 'Estado') || 'Pendiente'}</span>
+                                                                        <span className="text-[10px] font-black uppercase text-brand-dark/50">{formatearFecha(getProp(ev, 'Fecha'))}</span>
+                                                                    </div>
+                                                                    <div className="space-y-1 mb-1.5">
+                                                                        {String(getProp(ev, 'Reto') || 'Evidencia').split(' | ').slice(0, 2).map((line, j) => {
+                                                                            return (
+                                                                                <p key={j} className="font-black text-brand-dark text-xs leading-tight uppercase truncate">{line}</p>
+                                                                            );
+                                                                        })}
+                                                                        {String(getProp(ev, 'Reto') || '').split(' | ').length > 2 && <p className="text-[9px] font-bold text-brand-dark/40 italic">... y más cambios (+)</p>}
+                                                                    </div>
+                                                                    <p className="text-[10px] font-bold text-brand-dark/60 flex items-center gap-1"><Users className="w-3 h-3"/> {getProp(ev, 'Correo')}</p>
                                                                 </div>
-                                                                <div className="space-y-1 mb-1.5">
-                                                                    {String(getProp(ev, 'Reto') || 'Evidencia').split(' | ').slice(0, 2).map((line, j) => (
-                                                                        <p key={j} className="font-black text-brand-dark text-xs leading-tight uppercase truncate">{line}</p>
-                                                                    ))}
-                                                                    {String(getProp(ev, 'Reto') || '').split(' | ').length > 2 && <p className="text-[9px] font-bold text-brand-dark/40 italic">... y más cambios (+)</p>}
-                                                                </div>
-                                                                <p className="text-[10px] font-bold text-brand-dark/60 flex items-center gap-1"><Users className="w-3 h-3"/> {getProp(ev, 'Correo')}</p>
+                                                                <button onClick={() => setAdminEvalEvidencia(ev)} className="w-full sm:w-auto shrink-0 bg-brand-dark text-brand-bg1 px-4 py-2.5 rounded-xl font-black text-[10px] uppercase shadow-md hover:scale-105">Evaluar Prueba</button>
                                                             </div>
-                                                            <button onClick={() => setAdminEvalEvidencia(ev)} className="w-full sm:w-auto shrink-0 bg-brand-dark text-brand-bg1 px-4 py-2.5 rounded-xl font-black text-[10px] uppercase shadow-md hover:scale-105">Evaluar Prueba</button>
-                                                        </div>
-                                                    )})
+                                                        );
+                                                    })
                                                 )}
                                             </div>
                                         )}
@@ -1255,16 +1275,18 @@
                                         {previewFiles.length > 0 ? (
                                             <div className="w-full flex flex-col items-center gap-3">
                                                 <div className="w-full h-32 bg-black/5 rounded-2xl border border-black/10 overflow-x-auto flex items-center justify-start p-2 gap-2 relative group hide-scroll">
-                                                    {previewFiles.map((pf, i) => (
-                                                        <div key={i} className="min-w-[100px] h-full relative rounded-xl overflow-hidden shrink-0 bg-black shadow-sm">
-                                                            {pf.type.startsWith('video/') ? (
-                                                                <video src={pf.url} className="w-full h-full object-cover"></video>
-                                                            ) : (
-                                                                <img src={pf.url} className="w-full h-full object-cover" />
-                                                            )}
-                                                            <button type="button" onClick={() => setPreviewFiles(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-md"><X className="w-3 h-3"/></button>
-                                                        </div>
-                                                    ))}
+                                                    {previewFiles.map((pf, i) => {
+                                                        return (
+                                                            <div key={i} className="min-w-[100px] h-full relative rounded-xl overflow-hidden shrink-0 bg-black shadow-sm">
+                                                                {pf.type.startsWith('video/') ? (
+                                                                    <video src={pf.url} className="w-full h-full object-cover"></video>
+                                                                ) : (
+                                                                    <img src={pf.url} className="w-full h-full object-cover" />
+                                                                )}
+                                                                <button type="button" onClick={() => setPreviewFiles(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-md"><X className="w-3 h-3"/></button>
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
                                                 <div className="flex justify-between w-full">
                                                     <button type="button" onClick={() => document.getElementById('galleryInputMulti').click()} className="text-brand-dark font-black text-[10px] uppercase px-3 py-1.5 rounded-lg border border-brand-dark/20 hover:bg-white/50">+ Agregar más</button>
@@ -1365,7 +1387,11 @@
                                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 modal-overlay animate-fade-in" onClick={() => setSelectedVideo(null)}>
                                     <div className="bg-black w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative aspect-video flex flex-col" onClick={e => e.stopPropagation()}>
                                         <div className="absolute top-4 right-4 z-30 flex gap-2">
-                                            <button onClick={completeVideoChallenge} disabled={loading} className="bg-orange-500/90 text-white px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-wider hover:bg-orange-600 backdrop-blur-md shadow-lg">{loading ? '...' : 'Terminé de verlo (+ Pts)'}</button>
+                                            {!selectedVideo.isCompleted ? (
+                                                <button onClick={completeVideoChallenge} disabled={loading} className="bg-orange-500/90 text-white px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-wider hover:bg-orange-600 backdrop-blur-md shadow-lg">{loading ? '...' : 'Terminé de verlo (+ Pts)'}</button>
+                                            ) : (
+                                                <div className="bg-green-500/90 text-white px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-wider backdrop-blur-md shadow-lg flex items-center gap-1"><CheckCircle className="w-3 h-3"/> Visto (Puntos Reclamados)</div>
+                                            )}
                                             <button onClick={() => setSelectedVideo(null)} className="bg-black/50 text-white p-2 rounded-full hover:bg-black transition-colors border border-white/20"><X className="w-5 h-5" /></button>
                                         </div>
                                         <div className="flex-1 w-full h-full relative">
@@ -1412,11 +1438,13 @@
                                         <div>
                                             <span className="text-[9px] font-black uppercase text-brand-dark/50 block mb-2">Desglose de Cambios / Reto</span>
                                             <div className="space-y-2">
-                                                {String(selectedHistoryItem.Reto).split(' | ').map((line, i) => (
-                                                    <div key={i} className="bg-white/60 p-3 rounded-xl border border-brand-dark/5 shadow-sm">
-                                                        <p className="text-xs font-black text-brand-dark uppercase leading-snug">{line}</p>
-                                                    </div>
-                                                ))}
+                                                {String(selectedHistoryItem.Reto).split(' | ').map((line, i) => {
+                                                    return (
+                                                        <div key={i} className="bg-white/60 p-3 rounded-xl border border-brand-dark/5 shadow-sm">
+                                                            <p className="text-xs font-black text-brand-dark uppercase leading-snug">{line}</p>
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
 
