@@ -109,6 +109,24 @@
         .border-band-negra { border-color: #1f2937; color: #1f2937; box-shadow: inset 0 0 8px rgba(31, 41, 55, 0.2); }
         .border-band-roja { border-color: #ef4444; color: #ef4444; box-shadow: inset 0 0 8px rgba(239, 68, 68, 0.2); }
         .border-band-sin { border-color: #eab308; color: #eab308; box-shadow: inset 0 0 8px rgba(234, 179, 8, 0.2); }
+
+        /* ANIMACIONES ELEMENTALES PARA EL LOADER */
+        @keyframes element-pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.5; }
+            50% { transform: scale(1.3) rotate(90deg); opacity: 0.9; }
+        }
+        .orb-aura { position: absolute; width: 100%; height: 100%; border-radius: 40%; filter: blur(35px); z-index: 0; mix-blend-mode: multiply; }
+        .aura-fire { background: #ef4444; animation: element-pulse 4s ease-in-out infinite; top: -10%; left: -10%; }
+        .aura-water { background: #3b82f6; animation: element-pulse 5s ease-in-out infinite alternate; animation-delay: -1s; bottom: -10%; right: -10%; }
+        .aura-earth { background: #22c55e; animation: element-pulse 6s ease-in-out infinite; animation-delay: -2s; bottom: -10%; left: -10%; }
+        .aura-air { background: #cbd5e1; animation: element-pulse 4.5s ease-in-out infinite alternate; animation-delay: -3s; top: -10%; right: -10%; }
+        
+        @keyframes float-logo {
+            0%, 100% { transform: translateY(0); filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3)); }
+            50% { transform: translateY(-15px); filter: drop-shadow(0 30px 40px rgba(0,0,0,0.15)); }
+        }
+        .animate-float { animation: float-logo 4s ease-in-out infinite; }       
+                
         `;
 
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRNhYyhiWShaATM3XS2pvAufqmKnUlSvIrT8nLg_i9RrlSxtJXUGIJGORvaFs2QA/exec";
@@ -227,16 +245,28 @@
         };
 
         const GlobalLoader = () => (
-            <div className="fixed inset-0 z-[999999] bg-[#E5D3BD]/95 backdrop-blur-md flex flex-col items-center justify-center animate-fade-in" style={{ pointerEvents: 'all' }}>
-                <div className="relative flex items-center justify-center mb-10">
-                    <div className="absolute inset-0 bg-white/60 blur-3xl rounded-full animate-pulse scale-150"></div>
-                    <div className="absolute w-40 h-40 border-t-4 border-b-4 border-brand-dark rounded-full animate-spin"></div>
-                    <div className="absolute w-48 h-48 border-r-4 border-l-4 border-brand-dark/30 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '3s' }}></div>
-                    <img src="https://lh3.googleusercontent.com/d/1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" className="w-32 h-32 object-contain drop-shadow-2xl animate-pulse relative z-10" />
+            <div className="fixed inset-0 z-[999999] bg-[#E5D3BD]/95 backdrop-blur-xl flex flex-col items-center justify-center animate-fade-in" style={{ pointerEvents: 'all' }}>
+                <div className="relative flex items-center justify-center mb-16 w-64 h-64 sm:w-80 sm:h-80">
+                    {/* Auras de los 4 elementos */}
+                    <div className="absolute inset-0">
+                        <div className="orb-aura aura-fire"></div>
+                        <div className="orb-aura aura-water"></div>
+                        <div className="orb-aura aura-earth"></div>
+                        <div className="orb-aura aura-air"></div>
+                    </div>
+                    {/* Logo libre sin recuadros */}
+                    <img src="https://lh3.googleusercontent.com/d/1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" className="w-56 h-56 sm:w-72 sm:h-72 object-contain animate-float relative z-10" />
                 </div>
-                <div className="text-brand-dark font-black uppercase tracking-widest text-lg animate-pulse flex items-center gap-3 bg-white/80 px-8 py-3 rounded-full backdrop-blur-md shadow-xl border border-white">
-                    <div className="w-5 h-5 border-4 border-brand-dark border-t-transparent rounded-full animate-spin"></div>
-                    Sincronizando...
+                
+                <div className="text-brand-dark font-black uppercase tracking-[0.3em] text-sm animate-pulse flex flex-col items-center gap-3">
+                    <span>Sincronizando Elementos</span>
+                    {/* Puntos de colores que representan los elementos cargando */}
+                    <div className="flex gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-bounce shadow-md" style={{animationDelay: '0s'}}></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-bounce shadow-md" style={{animationDelay: '0.15s'}}></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-bounce shadow-md" style={{animationDelay: '0.3s'}}></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-slate-300 animate-bounce shadow-md" style={{animationDelay: '0.45s'}}></div>
+                    </div>
                 </div>
             </div>
         );
@@ -703,12 +733,14 @@
                         {/* LOGIN Y REGISTRO */}
                         {!user && (currentView === 'login' || currentView === 'register') && (
                             <div className="flex flex-col items-center justify-center animate-slide-up py-10">
-                                <div className="mb-8 flex flex-col items-center">
-                                    <div className="w-24 h-24 rounded-full bg-brand-dark flex items-center justify-center shadow-2xl mb-4 border-4 border-brand-dark/10 overflow-hidden p-3">
-                                        <ElementaLogo className="w-full h-full object-contain" />
+                                <div className="mb-10 flex flex-col items-center w-full">
+                                    <div className="w-48 h-48 sm:w-56 sm:h-56 mb-6 relative flex items-center justify-center">
+                                        {/* Brillo suave de fondo para darle profundidad sin bordes duros */}
+                                        <div className="absolute inset-0 bg-brand-dark/10 blur-3xl rounded-3xl z-0"></div>
+                                        <img src="https://lh3.googleusercontent.com/d/1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" className="w-full h-full object-contain animate-float relative z-10 drop-shadow-2xl" />
                                     </div>
-                                    <h1 className="text-4xl font-black uppercase tracking-widest text-brand-dark drop-shadow-sm">Elementa</h1>
-                                    <h2 className="text-xl font-medium tracking-[0.4em] text-brand-dark/70">TRAINING BOX</h2>
+                                    <h1 className="text-5xl font-black uppercase tracking-[0.2em] text-brand-dark drop-shadow-md text-center">Elementa</h1>
+                                    <h2 className="text-lg font-bold tracking-[0.5em] text-brand-dark/60 mt-2 text-center">TRAINING BOX</h2>
                                 </div>
                                 
                                 <div className="glass-card p-6 sm:p-8 rounded-[2.5rem] w-full max-w-md">
