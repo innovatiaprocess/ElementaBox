@@ -631,7 +631,8 @@
             };
 
             const Topbar = () => (
-                <div className="flex items-center gap-3">
+                <div className="sticky top-0 z-[100] bg-brand-bg1/95 backdrop-blur-xl px-6 py-4 flex justify-between items-center shadow-sm border-b border-brand-dark/10">
+                    <div className="flex items-center gap-3">
                         {/* Contenedor circular estricto que recorta las esquinas cuadradas */}
                         <div className="w-10 h-10 rounded-full shadow-md overflow-hidden border border-brand-dark/10 shrink-0 bg-brand-dark flex items-center justify-center">
                             <ElementaLogo className="w-full h-full object-cover scale-[1.10]" />
@@ -764,11 +765,11 @@
                                                     <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Apellidos</label><input type="text" name="apellidos" required pattern="^[A-Za-zÀ-ÿ\s]+$" title="Solo letras y espacios" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
-                                                    <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Cédula</label><input type="number" name="cedula" required min="10000" title="Número de documento válido" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
+                                                    <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Cédula</label><input type="number" name="cedula" required min="10000" title="Número de documento válido" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
                                                     <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Teléfono</label><input type="tel" name="telefono" required pattern="[0-9]{7,15}" title="Solo números (mínimo 7 dígitos)" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
-                                                    <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">EPS</label><input type="text" name="eps" required pattern="^[A-Za-zÀ-ÿ\s0-9]+$" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
+                                                    <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">EPS</label><input type="text" name="eps" required pattern="^[A-Za-zÀ-ÿ\s0-9]+$" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
                                                     <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Fecha Nacimiento</label><input type="date" name="fechaNac" required max={new Date().toISOString().split("T")[0]} className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
                                                 </div>
                                                 <div className="p-4 bg-brand-dark/5 rounded-xl border border-brand-dark/10 space-y-4 mt-2">
@@ -884,7 +885,7 @@
                                             </div>
                                         </div>
                                     )}
-
+                                    
                                     {skillTab === 'levantamientos' && (
                                         <div className="space-y-4 animate-fade-in">
                                             <div className="flex items-center gap-2 mb-2">
@@ -1024,7 +1025,7 @@
                                     <p className="text-sm font-bold text-brand-dark/50 mt-2">Entrenamientos y Retos</p>
                                 </div>
 
-                                {dataLoading ? <Loader /> : (
+                                {dataLoading ? <div className="text-center py-10 font-bold animate-pulse text-brand-dark/50">Cargando datos...</div> : (
                                     <div className="space-y-6">
                                         {(!wodsList || wodsList.length === 0) ? (
                                             <div className="bg-white/40 p-6 rounded-2xl border border-brand-dark/10 text-center shadow-sm">
@@ -1094,7 +1095,7 @@
                                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-brand-dark/50" />
                                     <input type="text" placeholder="Buscar movimiento..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/60 focus:bg-white outline-none transition-all shadow-inner font-bold text-brand-dark" />
                                 </div>
-                                {dataLoading ? <Loader /> : (
+                                {dataLoading ? <div className="text-center py-10 font-bold animate-pulse text-brand-dark/50">Cargando datos...</div> : (
                                     <div className="space-y-4">
                                         {Object.keys(groupedFilteredVideos).map((category, catIdx) => {
                                             return (
@@ -1162,7 +1163,7 @@
                                     <h2 className="text-4xl font-black uppercase leading-none mt-1">Eventos</h2>
                                     <p className="text-sm font-bold text-brand-dark/50 mt-2">Actividades extraordinarias y comunidad</p>
                                 </div>
-                                {dataLoading ? <Loader /> : (
+                                {dataLoading ? <div className="text-center py-10 font-bold animate-pulse text-brand-dark/50">Cargando datos...</div> : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                                         {blogPosts?.map((post, idx) => {
                                             if(!post) return null;
@@ -1252,7 +1253,7 @@
                                             <h3 className="text-xl font-black flex items-center gap-2"><Users className="w-5 h-5"/> Directorio de Atletas</h3>
                                         </div>
                                         
-                                        {dataLoading ? <Loader /> : (
+                                        {dataLoading ? <div className="text-center py-10 font-bold animate-pulse text-brand-dark/50">Cargando datos...</div> : (
                                             <div className="space-y-3">
                                                 {adminSheetData?.map((row, idx) => {
                                                     if (!row) return null;
