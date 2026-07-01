@@ -33,7 +33,7 @@
 
         const Icons = {
             ElementaLogo: (p) => (
-                <img src="https://drive.google.com/uc?export=view&id=1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" {...p} />
+                <img src="https://lh3.googleusercontent.com/d/1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" {...p} />
             ),
             Home: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
             Play: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>,
@@ -232,7 +232,7 @@
                     <div className="absolute inset-0 bg-white/60 blur-3xl rounded-full animate-pulse scale-150"></div>
                     <div className="absolute w-40 h-40 border-t-4 border-b-4 border-brand-dark rounded-full animate-spin"></div>
                     <div className="absolute w-48 h-48 border-r-4 border-l-4 border-brand-dark/30 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '3s' }}></div>
-                    <img src="https://drive.google.com/uc?export=view&id=1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" className="w-32 h-32 object-contain drop-shadow-2xl animate-pulse relative z-10" />
+                    <img src="https://lh3.googleusercontent.com/d/1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" className="w-32 h-32 object-contain drop-shadow-2xl animate-pulse relative z-10" />
                 </div>
                 <div className="text-brand-dark font-black uppercase tracking-widest text-lg animate-pulse flex items-center gap-3 bg-white/80 px-8 py-3 rounded-full backdrop-blur-md shadow-xl border border-white">
                     <div className="w-5 h-5 border-4 border-brand-dark border-t-transparent rounded-full animate-spin"></div>
@@ -525,6 +525,34 @@
                 if (res.status === 'success') { setSuccessMsg('Actualizado correctamente.'); setTimeout(() => { setSuccessMsg(''); setEditingPayment(null); loadAppData(user); }, 1500); } else { setErrorMsg(res.message); }
                 setLoading(false);
             };
+
+            const handleAddEvent = async (e) => {
+                e.preventDefault(); setLoading(true); setErrorMsg(''); setSuccessMsg('');
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+                const res = await apiCall('addEvento', data);
+                if (res.status === 'success') {
+                    setSuccessMsg('Evento publicado correctamente.');
+                    e.target.reset();
+                    loadAppData(user);
+                } else { setErrorMsg(res.message); }
+                setLoading(false);
+                setTimeout(() => setSuccessMsg(''), 3000);
+            };
+
+            const handleAddWOD = async (e) => {
+                e.preventDefault(); setLoading(true); setErrorMsg(''); setSuccessMsg('');
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+                const res = await apiCall('addWOD', data);
+                if (res.status === 'success') {
+                    setSuccessMsg('WOD registrado correctamente.');
+                    e.target.reset();
+                    loadAppData(user);
+                } else { setErrorMsg(res.message); }
+                setLoading(false);
+                setTimeout(() => setSuccessMsg(''), 3000);
+            };       
 
             const calcularDias = (fechaCaducidad) => {
                 if (!fechaCaducidad) return { texto: 'Sin fecha', color: 'text-brand-dark/50' };
@@ -1138,7 +1166,45 @@
                                 <div className="flex gap-2 overflow-x-auto hide-scroll px-2 pb-2">
                                     <button onClick={() => setAdminTab('evidencias')} className={`shrink-0 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${adminTab === 'evidencias' ? 'bg-brand-dark text-brand-bg1 shadow-lg' : 'glass-card text-brand-dark hover:bg-white'}`}>Validar Evidencias</button>
                                     <button onClick={() => setAdminTab('validacionPagos')} className={`shrink-0 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${adminTab === 'validacionPagos' ? 'bg-brand-dark text-brand-bg1 shadow-lg' : 'glass-card text-brand-dark hover:bg-white'}`}>Gestión Atletas</button>
+                                    <button onClick={() => setAdminTab('eventos')} className={`shrink-0 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${adminTab === 'eventos' ? 'bg-brand-dark text-brand-bg1 shadow-lg' : 'glass-card text-brand-dark hover:bg-white'}`}>Subir Evento</button>
+                                    <button onClick={() => setAdminTab('wods')} className={`shrink-0 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${adminTab === 'wods' ? 'bg-brand-dark text-brand-bg1 shadow-lg' : 'glass-card text-brand-dark hover:bg-white'}`}>Subir WOD</button>
                                 </div>
+
+                                {/* AQUI EMPIEZAN LOS NUEVOS TABS */}
+                                {adminTab === 'eventos' && (
+                                    <div className="glass-card p-4 sm:p-6 rounded-[2rem] border border-white/40">
+                                        <h3 className="text-xl font-black flex items-center gap-2 mb-4"><BookOpen className="w-5 h-5"/> Registrar Evento/Blog</h3>
+                                        {successMsg && <div className="bg-green-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{successMsg}</div>}
+                                        {errorMsg && <div className="bg-red-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{errorMsg}</div>}
+                                        <form onSubmit={handleAddEvent} className="space-y-4">
+                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Título</label><input type="text" name="Titulo" required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Fecha</label><input type="date" name="Fecha" required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Hora</label><input type="time" name="Hora" className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                            </div>
+                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Punto de Encuentro</label><input type="text" name="PuntoEncuentro" className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">URL de Imagen (Opcional)</label><input type="url" name="URL_Imagen" placeholder="https://..." className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm text-xs" /></div>
+                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Descripción</label><textarea name="Descripcion" required rows="4" className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm"></textarea></div>
+                                            <button type="submit" disabled={loading} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase shadow-xl hover:scale-105 transition-transform">{loading ? 'Subiendo...' : 'Publicar Evento'}</button>
+                                        </form>
+                                    </div>
+                                )}
+
+                                {adminTab === 'wods' && (
+                                    <div className="glass-card p-4 sm:p-6 rounded-[2rem] border border-white/40">
+                                        <h3 className="text-xl font-black flex items-center gap-2 mb-4"><Calendar className="w-5 h-5"/> Registrar WOD</h3>
+                                        {successMsg && <div className="bg-green-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{successMsg}</div>}
+                                        {errorMsg && <div className="bg-red-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{errorMsg}</div>}
+                                        <form onSubmit={handleAddWOD} className="space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Título (Ej: Lunes)</label><input type="text" name="Titulo" required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Fecha</label><input type="date" name="Fecha" required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                            </div>
+                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Descripción del WOD</label><textarea name="Descripcion" required rows="6" className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm whitespace-pre-wrap"></textarea></div>
+                                            <button type="submit" disabled={loading} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase shadow-xl hover:scale-105 transition-transform">{loading ? 'Guardando...' : 'Guardar WOD'}</button>
+                                        </form>
+                                    </div>
+                                )}
 
                                 {/* GESTIÓN DE ATLETAS (INFO PERSONAS) */}
                                 {adminTab === 'validacionPagos' && (
@@ -1363,8 +1429,8 @@
                                     
                                     <div className="flex-1 overflow-y-auto hide-scroll bg-brand-bg1">
                                         {selectedPost.parsedImage && (
-                                            <div className="w-full h-64 sm:h-96 relative shadow-md bg-brand-dark">
-                                                <img src={selectedPost.parsedImage} className="w-full h-full object-cover" alt="Detalle" />
+                                            <div className="w-full relative shadow-md bg-brand-dark flex justify-center">
+                                                <img src={selectedPost.parsedImage} className="w-full h-auto max-h-[none] object-contain" alt="Detalle" />
                                             </div>
                                         )}
                                         <div className={`p-6 sm:p-12 ${!selectedPost.parsedImage ? 'pt-20' : ''}`}>
