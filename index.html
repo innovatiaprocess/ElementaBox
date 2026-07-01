@@ -89,21 +89,42 @@
         @keyframes zoomIn { 0% { opacity: 0; transform: scale(0.95) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } } .animate-zoom-in { animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
         @keyframes videogame-pulse {
-            0%, 100% { transform: scale(1.15); box-shadow: 0 0 15px currentColor; }
-            50% { transform: scale(1.25); box-shadow: 0 0 25px currentColor; }
+            0%, 100% { transform: scale(1.05); box-shadow: 0 0 10px currentColor; }
+            50% { transform: scale(1.15); box-shadow: 0 0 20px currentColor; }
         }
         .band-btn { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .videogame-active { animation: videogame-pulse 1.5s infinite; border-color: rgba(255,255,255,0.9) !important; z-index: 10; }
-        
-        .color-azul { color: #3b82f6; background-color: #3b82f6; }
-        .color-verde { color: #22c55e; background-color: #22c55e; }
-        .color-morada { color: #9333ea; background-color: #9333ea; }
-        .color-negra { color: #1f2937; background-color: #1f2937; }
-        .color-roja { color: #ef4444; background-color: #ef4444; }
-        .color-sin { color: #eab308; background-color: #eab308; }
+        .videogame-active { animation: videogame-pulse 1.5s infinite; z-index: 10; }
+
+        @keyframes btn-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.6); transform: scale(1); }
+            50% { box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); transform: scale(1.05); }
+            100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); transform: scale(1); }
+        }
+        .btn-puntos {
+            animation: btn-pulse 2.5s infinite;
+            background: linear-gradient(135deg, #fff, rgb(var(--color-brand-bg1)));
+            border: 2px solid #eab308;
+            color: #854d0e;
+        }
+
+        /* Colores exactos para el Nivel Oficial (Sólido) y Nivel Pendiente (Outline) */
+        .bg-band-azul { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+        .bg-band-verde { background-color: #22c55e; color: white; border-color: #22c55e; }
+        .bg-band-morada { background-color: #9333ea; color: white; border-color: #9333ea; }
+        .bg-band-negra { background-color: #1f2937; color: white; border-color: #1f2937; }
+        .bg-band-roja { background-color: #ef4444; color: white; border-color: #ef4444; }
+        .bg-band-sin { background-color: #eab308; color: white; border-color: #eab308; }
+
+        .border-band-azul { border-color: #3b82f6; color: #3b82f6; box-shadow: inset 0 0 8px rgba(59, 130, 246, 0.2); }
+        .border-band-verde { border-color: #22c55e; color: #22c55e; box-shadow: inset 0 0 8px rgba(34, 197, 94, 0.2); }
+        .border-band-morada { border-color: #9333ea; color: #9333ea; box-shadow: inset 0 0 8px rgba(147, 51, 234, 0.2); }
+        .border-band-negra { border-color: #1f2937; color: #1f2937; box-shadow: inset 0 0 8px rgba(31, 41, 55, 0.2); }
+        .border-band-roja { border-color: #ef4444; color: #ef4444; box-shadow: inset 0 0 8px rgba(239, 68, 68, 0.2); }
+        .border-band-sin { border-color: #eab308; color: #eab308; box-shadow: inset 0 0 8px rgba(234, 179, 8, 0.2); }
         `;
 
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby_6zQAaeVwPK_E76DZ4ipxU-vZcU3_Qqi0hv-pbcX-ezVpxNNLaUATL4j-jcmbc94-/exec";
+        // URL DE APPS SCRIPT OFICIAL ACTUALIZADA
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRNhYyhiWShaATM3XS2pvAufqmKnUlSvIrT8nLg_i9RrlSxtJXUGIJGORvaFs2QA/exec";
 
         const OPCIONES_OBSERVACION = [
             'Evidencia no corresponde al reto asignado',
@@ -169,6 +190,16 @@
             return { type: null, id: null };
         };
 
+        // PARSER PARA CONVERTIR ENLACES DE GOOGLE DRIVE A IMÁGENES MOSTRABLES
+        const getDirectImageUrl = (url) => {
+            if (!url) return null;
+            if (url.includes('drive.google.com')) {
+                const match = url.match(/[-\w]{25,}/);
+                if (match) return `https://drive.google.com/uc?export=view&id=${match[0]}`;
+            }
+            return url;
+        };
+
         const formatearFecha = (fechaString) => {
             if (!fechaString) return 'N/A';
             const date = new Date(fechaString);
@@ -196,20 +227,28 @@
                     img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 1920;
+                        const MAX_WIDTH = 1024;
                         let width = img.width; let height = img.height;
                         if (width > MAX_WIDTH) { height = Math.round((height * MAX_WIDTH) / width); width = MAX_WIDTH; }
                         canvas.width = width; canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.85));
+                        resolve(canvas.toDataURL('image/jpeg', 0.65));
                     };
                 };
                 reader.onerror = error => reject(error);
             });
         };
 
-        const Loader = () => <div className="flex justify-center py-12"><div className="w-10 h-10 border-4 border-brand-dark border-t-transparent rounded-full animate-spin"></div></div>;
+        const GlobalLoader = () => (
+            <div className="fixed inset-0 z-[99999] bg-[#E5D3BD] flex flex-col items-center justify-center animate-fade-in">
+                <video src="https://drive.google.com/uc?export=view&id=1_6UqArGQtjN-61mWhs5MoAy1QlBzZoMA" autoPlay loop muted playsInline className="w-64 h-64 object-contain mix-blend-multiply mb-6 pointer-events-none"></video>
+                <div className="text-brand-dark font-black uppercase tracking-widest text-lg animate-pulse flex items-center gap-2">
+                    <div className="w-4 h-4 border-4 border-brand-dark border-t-transparent rounded-full animate-spin"></div>
+                    Sincronizando...
+                </div>
+            </div>
+        );
 
         function App() {
             const [user, setUser] = useState(null); 
@@ -237,6 +276,7 @@
             const [userSkills, setUserSkills] = useState(defaultSkills); 
             const [maxSkills, setMaxSkills] = useState(defaultSkills);
             const [pendingSkills, setPendingSkills] = useState({});
+            const [history, setHistory] = useState([]);
 
             const [adminTab, setAdminTab] = useState('evidencias'); 
             const [adminSheetData, setAdminSheetData] = useState([]);
@@ -274,9 +314,25 @@
                     if (res.misSkills && typeof res.misSkills === 'object') {
                         loadedSkills = { ...loadedSkills, ...res.misSkills };
                     }
-                    setUserSkills(loadedSkills);
                     setMaxSkills(loadedSkills); 
-                    setPendingSkills(res.misSkillsPendientes || {});
+                    
+                    const pendientes = res.misSkillsPendientes || {};
+                    setPendingSkills(pendientes);
+                    setHistory(res.misEvidencias || []);
+
+                    let uiSkills = { ...loadedSkills };
+                    for(let mov in pendientes) {
+                        if (gimLevels.includes(pendientes[mov])) {
+                            if (gimLevels.indexOf(pendientes[mov]) > gimLevels.indexOf(uiSkills[mov] || 'azul')) {
+                                uiSkills[mov] = pendientes[mov];
+                            }
+                        } else if (!isNaN(pendientes[mov])) {
+                            if (Number(pendientes[mov]) > Number(uiSkills[mov] || 0)) {
+                                uiSkills[mov] = pendientes[mov];
+                            }
+                        }
+                    }
+                    setUserSkills(uiSkills);
 
                     if (res.videos && res.videos.length > 0) {
                         const firstCat = getProp(res.videos[0], 'Categoria') || 'N1';
@@ -356,7 +412,7 @@
                 }
 
                 if (hasImprovements) {
-                    setUploadingReto({ Titulo: 'Validación de Nueva Marca (PR / Nivel)', Puntos: 'Por Calcular', isSkillUpdate: true });
+                    setUploadingReto({ Titulo: 'Validación de Nuevas Marcas (PR/Niveles)', Puntos: 'Por Calcular', isSkillUpdate: true });
                 } else {
                     handleSaveSkillsSilently();
                 }
@@ -421,11 +477,14 @@
 
             const handleSkillUpdate = (movimiento, valor) => { setUserSkills(prev => ({...prev, [movimiento]: valor})); };
 
-            const handleAdminValidateEvidence = async (e) => {
-                e.preventDefault(); setLoading(true);
-                const estado = e.target.decision.value;
-                const observacion = e.target.observacion.value;
-                if (estado === 'Rechazado' && !observacion) { 
+            const handleAdminValidateEvidence = async (e, estadoDecision) => {
+                e.preventDefault(); 
+                setLoading(true);
+                
+                const form = e.target.closest('form');
+                const observacion = form.observacion.value;
+                
+                if (estadoDecision === 'Rechazado' && !observacion) { 
                     setErrorMsg("Debe seleccionar una observación para rechazar."); 
                     setTimeout(() => setErrorMsg(''), 4000); 
                     setLoading(false); 
@@ -434,19 +493,17 @@
                 
                 const res = await apiCall('evaluateEvidence', { 
                     rowIndex: adminEvalEvidencia._rowIndex, 
-                    estado: estado, 
+                    estado: estadoDecision, 
                     observacion: observacion, 
-                    puntos: estado === 'Aprobado' ? getProp(adminEvalEvidencia, 'Puntos') : 0, 
+                    puntos: estadoDecision === 'Aprobado' ? getProp(adminEvalEvidencia, 'Puntos') : 0, 
                     correo: getProp(adminEvalEvidencia, 'Correo') || getProp(adminEvalEvidencia, 'Atleta') 
                 });
                 
                 if (res.status === 'success') { 
-                    // Actualización optimista: Oculta la evidencia de inmediato
                     setAdminEvidencias(prev => prev.filter(ev => ev._rowIndex !== adminEvalEvidencia._rowIndex));
                     setAdminEvalEvidencia(null); 
-                    setSuccessMsg(`Evidencia ${estado.toLowerCase()} correctamente. Puntos actualizados.`);
+                    setSuccessMsg(`Evidencia ${estadoDecision.toLowerCase()} correctamente. Puntos actualizados.`);
                     setTimeout(() => setSuccessMsg(''), 4000);
-                    // Actualiza los niveles y puntos en segundo plano
                     loadAppData(user); 
                 } else { 
                     setErrorMsg(res.message); 
@@ -501,50 +558,51 @@
                 </div>
             );
 
+            // ENCABEZADO COMPRIMIDO Y RE-DISEÑADO
             const ProfileSuperCard = () => (
-                <div className="sticky top-[76px] z-[90] glass-card rounded-[1.5rem] p-5 flex flex-col gap-5 border border-white/60 shadow-lg mb-6 transition-all">
+                <div className="sticky top-[76px] z-[90] glass-card rounded-[2rem] p-3.5 flex flex-col gap-3.5 border border-white/60 shadow-lg mb-4 transition-all">
                     <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                            <div className="w-14 h-14 bg-brand-dark text-brand-bg1 rounded-full flex items-center justify-center font-black text-2xl shadow-lg ring-2 ring-brand-bg1/30">
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-10 h-10 bg-brand-dark text-brand-bg1 rounded-full flex items-center justify-center font-black text-xl shadow-md ring-2 ring-brand-bg1/50">
                                 {String(user.name || 'E').charAt(0).toUpperCase()}
                             </div>
-                            <div className="flex flex-col">
-                                <h2 className="text-xl font-black uppercase leading-none text-brand-dark tracking-tight">
+                            <div className="flex flex-col justify-center">
+                                <h2 className="text-sm font-black uppercase leading-none text-brand-dark tracking-tight">
                                     {user.name} {user.apellidos || ''}
                                 </h2>
-                                <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                                    <span className="text-[10px] bg-black/5 px-2 py-0.5 rounded font-black uppercase text-brand-dark/60 border border-brand-dark/10 shadow-inner">{user.plan || 'Sin Plan'}</span>
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-black uppercase shadow-sm ${String(user.status || '').trim().toLowerCase() === 'activo' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>{user.status}</span>
+                                <div className="flex items-center gap-1 mt-1 flex-wrap">
+                                    <span className="text-[8px] bg-black/5 px-1.5 py-0.5 rounded font-black uppercase text-brand-dark/60 border border-brand-dark/10">{user.plan || 'Sin Plan'}</span>
+                                    <span className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase shadow-sm ${String(user.status || '').trim().toLowerCase() === 'activo' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>{user.status}</span>
                                 </div>
                             </div>
                         </div>
                         
-                        <button onClick={() => handleNavigation('ranking')} className="bg-brand-bg2 hover:bg-brand-dark hover:text-brand-bg1 transition-colors text-brand-dark px-4 py-2 rounded-xl flex flex-col items-center shadow-sm border border-brand-dark/10 cursor-pointer group shrink-0">
-                            <span className="font-black text-2xl leading-none group-hover:scale-110 transition-transform">{misPuntos}</span>
-                            <span className="text-[9px] font-black uppercase tracking-widest mt-1 opacity-80 flex items-center gap-1"><Trophy className="w-3 h-3"/> Puntos</span>
+                        <button onClick={() => handleNavigation('ranking')} className="btn-puntos px-4 py-1.5 rounded-[1rem] flex flex-col items-center shadow-md cursor-pointer shrink-0">
+                            <span className="font-black text-xl leading-none">{misPuntos}</span>
+                            <span className="text-[7px] font-black uppercase tracking-widest mt-0.5 opacity-90 flex items-center gap-0.5"><Trophy className="w-2.5 h-2.5"/> Puntos</span>
                         </button>
                     </div>
 
                     {!String(user.plan || '').includes('12 Clases') ? (
-                        <div className="flex gap-3 w-full">
-                            <div className="flex-1 bg-green-500/10 border border-green-500/20 rounded-xl p-2.5 flex items-center justify-center sm:justify-start gap-2 shadow-sm">
-                                <Clock className="w-4 h-4 text-green-700 opacity-70 hidden sm:block"/>
-                                <div className="flex flex-col items-center sm:items-start">
-                                    <span className="text-[9px] font-black uppercase text-green-700/60 leading-none mb-0.5">Ingreso</span>
-                                    <span className="text-xs font-black text-green-800 leading-none tracking-wide">{formatearFecha(user.ingreso)}</span>
+                        <div className="flex gap-2 w-full">
+                            <div className="flex-1 bg-green-500/10 border border-green-500/20 rounded-xl p-1.5 px-3 flex items-center justify-between gap-1 shadow-sm">
+                                <div className="flex items-center gap-1">
+                                    <Clock className="w-3 h-3 text-green-700 opacity-70"/>
+                                    <span className="text-[8px] font-black uppercase text-green-700/60 leading-none">Ingreso</span>
                                 </div>
+                                <span className="text-[10px] font-black text-green-800 leading-none tracking-wide">{formatearFecha(user.ingreso)}</span>
                             </div>
-                            <div className="flex-1 bg-red-500/10 border border-red-500/20 rounded-xl p-2.5 flex items-center justify-center sm:justify-start gap-2 shadow-sm">
-                                <AlertCircle className="w-4 h-4 text-red-700 opacity-70 hidden sm:block"/>
-                                <div className="flex flex-col items-center sm:items-start">
-                                    <span className="text-[9px] font-black uppercase text-red-700/60 leading-none mb-0.5">Vencimiento</span>
-                                    <span className="text-xs font-black text-red-800 leading-none tracking-wide">{formatearFecha(user.caducidad)}</span>
+                            <div className="flex-1 bg-red-500/10 border border-red-500/20 rounded-xl p-1.5 px-3 flex items-center justify-between gap-1 shadow-sm">
+                                <div className="flex items-center gap-1">
+                                    <AlertCircle className="w-3 h-3 text-red-700 opacity-70"/>
+                                    <span className="text-[8px] font-black uppercase text-red-700/60 leading-none">Vence</span>
                                 </div>
+                                <span className="text-[10px] font-black text-red-800 leading-none tracking-wide">{formatearFecha(user.caducidad)}</span>
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-brand-dark/5 rounded-xl p-3 flex justify-center items-center text-xs font-black text-brand-dark border border-brand-dark/10 shadow-sm">
-                            <span className="flex items-center gap-2"><Clock className="w-4 h-4"/> Tienes <strong className="text-lg mx-1">{user.diasRestantes || 0}</strong> clases restantes</span>
+                        <div className="bg-brand-dark/5 rounded-xl p-1.5 flex justify-center items-center text-[10px] font-black text-brand-dark border border-brand-dark/10 shadow-sm">
+                            <span className="flex items-center gap-1"><Clock className="w-3 h-3"/> Tienes <strong className="text-sm mx-1">{user.diasRestantes || 0}</strong> clases restantes</span>
                         </div>
                     )}
                 </div>
@@ -578,6 +636,8 @@
             return (
                 <div className="pb-32 min-h-screen">
                     <style dangerouslySetInnerHTML={{ __html: customStyles }} />
+
+                    {dataLoading && <GlobalLoader />}
 
                     {(user || currentView !== 'login') && <Topbar />}
 
@@ -670,8 +730,14 @@
                                             </div>
                                             <p className="text-[10px] font-bold text-brand-dark/60 bg-white/50 p-3 rounded-xl leading-tight">Tu récord oficial es la base. Si solicitas validar una banda de mayor dificultad, requerirá evidencia en foto o video.</p>
                                             
+                                            <div className="flex items-center gap-4 text-[9px] font-black uppercase text-brand-dark/60 mt-3 justify-center bg-white/50 p-2 rounded-xl mb-4 shadow-sm">
+                                                <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full border-2 border-dashed border-gray-400"></div> Nivel Solicitado</span>
+                                                <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-blue-500"></div> PR Oficial</span>
+                                            </div>
+
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                                                {movimientosGimnasia.map((mov, idx) => (
+                                                {movimientosGimnasia.map((mov, idx) => {
+                                                    return (
                                                     <div key={idx} className="bg-white/60 p-3.5 sm:p-4 rounded-2xl border border-brand-dark/10 shadow-sm flex flex-col gap-3">
                                                         <div className="flex justify-between items-start">
                                                             <h4 className="font-black text-xs text-brand-dark uppercase tracking-wider">{mov}</h4>
@@ -680,24 +746,35 @@
                                                                     <span className="text-[8px] font-black uppercase tracking-widest text-brand-dark/40 bg-black/5 px-2 py-0.5 rounded">PR Oficial: {nivelesGimnasiaList.find(n => n.color === maxSkills[mov])?.label || 'Banda Azul'}</span>
                                                                 )}
                                                                 {pendingSkills[mov] && gimLevels.indexOf(pendingSkills[mov]) > gimLevels.indexOf(maxSkills[mov] || 'azul') && (
-                                                                    <span className="text-[8px] font-black uppercase tracking-widest text-orange-700 bg-orange-100 px-2 py-0.5 rounded border border-orange-200 flex items-center gap-1">
-                                                                        <Clock className="w-2.5 h-2.5"/> Pendiente: {nivelesGimnasiaList.find(n => n.color === pendingSkills[mov])?.label}
+                                                                    <span className="text-[8px] font-black uppercase tracking-widest text-orange-700 bg-orange-100 px-2 py-0.5 rounded border border-orange-200 flex items-center gap-1 shadow-sm">
+                                                                        <Clock className="w-2.5 h-2.5"/> En validación: {nivelesGimnasiaList.find(n => n.color === pendingSkills[mov])?.label}
                                                                     </span>
                                                                 )}
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center justify-between bg-black/5 p-2 rounded-full border border-black/5">
+                                                        <div className="flex items-center justify-between bg-black/5 p-2 rounded-full border border-black/5 mt-1 relative">
                                                             {nivelesGimnasiaList.map(nv => {
                                                                 const isActive = userSkills[mov] === nv.color;
+                                                                const isMaxOfficial = maxSkills[mov] === nv.color;
+                                                                
+                                                                let btnClass = "w-7 h-7 sm:w-8 sm:h-8 rounded-full transition-all duration-300 relative group flex items-center justify-center ";
+                                                                
+                                                                if (isMaxOfficial) {
+                                                                    btnClass += `bg-band-${nv.color} shadow-lg scale-110 z-10 border-2 border-transparent`;
+                                                                } else if (isActive) {
+                                                                    btnClass += `bg-transparent border-band-${nv.color} border-[3px] border-dashed scale-110 videogame-active z-10`;
+                                                                } else {
+                                                                    btnClass += `bg-black/10 border-2 border-transparent opacity-40 hover:opacity-100 grayscale hover:grayscale-0 hover:scale-110`;
+                                                                }
+
                                                                 return (
                                                                 <button 
                                                                     key={nv.color}
                                                                     onClick={() => handleSkillUpdate(mov, nv.color)}
-                                                                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 transition-all duration-300 relative group flex items-center justify-center
-                                                                        ${isActive ? `color-${nv.color} videogame-active` : `color-${nv.color} opacity-40 hover:opacity-100 grayscale hover:grayscale-0 border-transparent hover:scale-110`}`}
+                                                                    className={btnClass}
                                                                     title={`${nv.nivel}: ${nv.label}`}
                                                                 >
-                                                                    {isActive && <CheckCircle className="w-4 h-4 text-white drop-shadow-md z-20 absolute"/>}
+                                                                    {isActive && <CheckCircle className={`w-4 h-4 drop-shadow-md z-20 absolute ${isMaxOfficial ? 'text-white' : `text-${nv.color}-600`}`}/>}
                                                                 </button>
                                                             )})}
                                                         </div>
@@ -705,7 +782,7 @@
                                                             Nivel a Solicitar: {userSkills[mov] ? nivelesGimnasiaList.find(n => n.color === userSkills[mov])?.label : 'Sin Nivel'}
                                                         </div>
                                                     </div>
-                                                ))}
+                                                )})}
                                             </div>
                                         </div>
                                     )}
@@ -723,10 +800,12 @@
                                                     <div key={idx} className="bg-white/60 p-4 rounded-2xl border border-brand-dark/10 flex items-center justify-between gap-3 shadow-sm hover:bg-white/80 transition-colors flex-wrap">
                                                         <div className="flex flex-col flex-1 items-start">
                                                             <h4 className="font-black text-xs text-brand-dark uppercase tracking-wider leading-tight">{mov}</h4>
-                                                            <span className="text-[9px] font-black text-brand-dark/40 uppercase mt-0.5 mb-1">PR Oficial: {maxSkills[mov] || 0} LBS</span>
+                                                            <span className="text-[9px] font-black text-brand-dark/40 uppercase mt-0.5 mb-1 flex items-center gap-1">
+                                                                PR Oficial: <strong className={`${maxSkills[mov] > 0 ? 'text-brand-bg1 bg-brand-dark px-1.5 py-0.5 rounded shadow-sm' : ''}`}>{maxSkills[mov] || 0} LBS</strong>
+                                                            </span>
                                                             {pendingSkills[mov] > (maxSkills[mov] || 0) && (
-                                                                <span className="text-[8px] font-black uppercase tracking-widest text-orange-700 bg-orange-100 px-2 py-0.5 rounded border border-orange-200 flex items-center gap-1">
-                                                                    <Clock className="w-2.5 h-2.5"/> Pendiente: {pendingSkills[mov]} LBS
+                                                                <span className="text-[8px] font-black uppercase tracking-widest text-orange-700 bg-orange-100 px-2 py-0.5 rounded border border-orange-200 flex items-center gap-1 shadow-sm mt-1">
+                                                                    <Clock className="w-2.5 h-2.5"/> En validación: {pendingSkills[mov]} LBS
                                                                 </span>
                                                             )}
                                                         </div>
@@ -749,6 +828,56 @@
                                     <button onClick={handleActualizarSkillsClick} disabled={loading} className="w-full mt-6 bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase text-sm shadow-xl hover:scale-[1.02] transition-transform flex items-center justify-center gap-2">
                                         {loading ? 'Validando Progreso...' : <><Upload className="w-5 h-5"/> Actualizar Mi Progreso</>}
                                     </button>
+                                </div>
+
+                                {/* HISTORIAL DE BATALLAS COMPACTO (TIPO HUD) */}
+                                <div className="mt-8 pt-6 border-t-2 border-brand-dark/10 animate-fade-in">
+                                    <div className="flex items-center gap-2 mb-4 px-2">
+                                        <Activity className="w-5 h-5 text-brand-dark"/>
+                                        <h3 className="font-black text-lg uppercase tracking-wider text-brand-dark drop-shadow-sm">Historial</h3>
+                                    </div>
+                                    
+                                    <div className="max-h-[300px] overflow-y-auto hide-scroll pr-1 pb-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                            {history.length === 0 ? (
+                                                <div className="bg-white/40 p-4 rounded-xl border border-brand-dark/10 text-center shadow-sm col-span-full">
+                                                    <p className="font-bold text-brand-dark/60 text-[10px]">Aún no hay registros en tu historial.</p>
+                                                </div>
+                                            ) : (
+                                                history.map((item, idx) => {
+                                                    const isApproved = String(item.Estado).toLowerCase() === 'aprobado';
+                                                    const isRejected = String(item.Estado).toLowerCase() === 'rechazado';
+                                                    
+                                                    return (
+                                                        <div key={idx} className="bg-brand-dark text-brand-bg1 rounded-xl p-3 shadow-sm border border-brand-bg2/20 flex flex-col gap-1.5 relative overflow-hidden group hover:scale-[1.01] transition-transform">
+                                                            <div className={`absolute left-0 top-0 w-1.5 h-full ${isApproved ? 'bg-green-500' : isRejected ? 'bg-red-500' : 'bg-orange-500'}`}></div>
+                                                            
+                                                            <div className="flex justify-between items-center pl-2">
+                                                                <h4 className="font-black text-[10px] sm:text-xs uppercase leading-tight pr-2 drop-shadow-sm truncate">{item.Reto}</h4>
+                                                                <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap tracking-widest ${isApproved ? 'bg-green-500/20 text-green-400 border border-green-500/30' : isRejected ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'}`}>
+                                                                    {item.Estado}
+                                                                </span>
+                                                            </div>
+                                                            
+                                                            <div className="pl-2 flex flex-col gap-1">
+                                                                <div className="flex items-center gap-2 text-[9px] sm:text-[10px]">
+                                                                    <span className="font-black text-brand-bg1/50 flex items-center gap-1"><Clock className="w-2.5 h-2.5"/> {formatearFecha(item.Fecha)}</span>
+                                                                    {isApproved && item.Puntos > 0 && <span className="font-black text-green-400 flex items-center gap-0.5"><Trophy className="w-2.5 h-2.5"/> +{item.Puntos} Pts</span>}
+                                                                </div>
+                                                                {item.Observacion && (
+                                                                    <div className="bg-black/30 p-1.5 px-2 rounded-lg border border-white/5 w-fit mt-0.5">
+                                                                        <p className="text-[9px] font-medium text-brand-bg1/80 italic leading-snug">
+                                                                            "{item.Observacion}"
+                                                                        </p>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -806,7 +935,6 @@
                                             <div className="bg-white/40 p-6 rounded-2xl border border-brand-dark/10 text-center shadow-sm">
                                                 <Calendar className="w-10 h-10 mx-auto text-brand-dark/30 mb-3" />
                                                 <p className="font-bold text-brand-dark/60 text-sm">No hay entrenamientos cargados.</p>
-                                                {user?.role === 'admin' && <p className="text-[10px] mt-2 text-brand-dark/40 font-black">Admin: Crea una pestaña llamada 'WODS' en el archivo Excel con las columnas: Titulo, Fecha y Descripcion.</p>}
                                             </div>
                                         ) : (
                                             wodsList.map((wod, idx) => (
@@ -913,9 +1041,9 @@
                                     <div className="grid grid-cols-1 gap-8">
                                         {blogPosts?.map((post, idx) => {
                                             if(!post) return null;
-                                            const urlImg = getProp(post, 'URL_Imagen');
+                                            const urlImg = getDirectImageUrl(getProp(post, 'URL_Imagen'));
                                             return (
-                                                <div key={idx} onClick={() => setSelectedPost({...post})} className="glass-card rounded-[2rem] overflow-hidden group hover:shadow-2xl transition-all duration-300 relative cursor-pointer flex flex-col border border-white/40">
+                                                <div key={idx} onClick={() => setSelectedPost({...post, parsedImage: urlImg})} className="glass-card rounded-[2rem] overflow-hidden group hover:shadow-2xl transition-all duration-300 relative cursor-pointer flex flex-col border border-white/40">
                                                     {urlImg && (
                                                         <div className="h-48 sm:h-72 w-full relative overflow-hidden bg-brand-dark">
                                                             <img src={urlImg} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" alt="News" />
@@ -1014,7 +1142,7 @@
                                                     )}
                                                 </div>
 
-                                                <form onSubmit={handleAdminValidateEvidence} className="space-y-4">
+                                                <form className="space-y-4">
                                                     <div>
                                                         <label className="block text-[10px] font-black uppercase mb-1">Observación al Atleta (Obligatorio si se rechaza)</label>
                                                         <select name="observacion" className="w-full p-3.5 rounded-xl bg-white font-bold outline-none border border-brand-dark/10 shadow-sm text-sm">
@@ -1023,8 +1151,8 @@
                                                         </select>
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-3 pt-4 border-t border-brand-dark/10">
-                                                        <button type="submit" name="decision" value="Rechazado" disabled={loading} className="w-full bg-red-100 text-red-700 p-4 rounded-xl font-black uppercase hover:bg-red-200 transition-colors shadow-sm">{loading ? '...' : 'Rechazar'}</button>
-                                                        <button type="submit" name="decision" value="Aprobado" disabled={loading} className="w-full bg-green-500 text-white p-4 rounded-xl font-black uppercase hover:bg-green-600 transition-colors shadow-md">{loading ? '...' : `Aprobar (+${getProp(adminEvalEvidencia, 'Puntos') || 0})`}</button>
+                                                        <button type="button" onClick={(e) => handleAdminValidateEvidence(e, 'Rechazado')} disabled={loading} className="w-full bg-red-100 text-red-700 p-4 rounded-xl font-black uppercase hover:bg-red-200 transition-colors shadow-sm">{loading ? '...' : 'Rechazar'}</button>
+                                                        <button type="button" onClick={(e) => handleAdminValidateEvidence(e, 'Aprobado')} disabled={loading} className="w-full bg-green-500 text-white p-4 rounded-xl font-black uppercase hover:bg-green-600 transition-colors shadow-md">{loading ? '...' : `Aprobar (+${getProp(adminEvalEvidencia, 'Puntos') || 0})`}</button>
                                                     </div>
                                                 </form>
                                             </div>
@@ -1147,12 +1275,12 @@
                                     <button onClick={() => setSelectedPost(null)} className="absolute top-4 right-4 z-30 bg-black/40 backdrop-blur-md text-white p-2 rounded-full shadow-lg hover:bg-black transition-colors"><X className="w-6 h-6" /></button>
                                     
                                     <div className="flex-1 overflow-y-auto hide-scroll bg-brand-bg1">
-                                        {getProp(selectedPost, 'URL_Imagen') && (
+                                        {selectedPost.parsedImage && (
                                             <div className="w-full h-64 sm:h-96 relative shadow-md bg-brand-dark">
-                                                <img src={getProp(selectedPost, 'URL_Imagen')} className="w-full h-full object-cover" alt="Detalle" />
+                                                <img src={selectedPost.parsedImage} className="w-full h-full object-cover" alt="Detalle" />
                                             </div>
                                         )}
-                                        <div className={`p-6 sm:p-12 ${!getProp(selectedPost, 'URL_Imagen') ? 'pt-20' : ''}`}>
+                                        <div className={`p-6 sm:p-12 ${!selectedPost.parsedImage ? 'pt-20' : ''}`}>
                                             <div className="flex gap-3 mb-5">
                                                 <span className="bg-brand-dark text-brand-bg1 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">{getProp(selectedPost, 'Etiqueta') || 'Evento'}</span>
                                                 <span className="text-brand-dark/60 text-xs font-bold uppercase py-1.5">{formatearFecha(getProp(selectedPost, 'Fecha'))}</span>
