@@ -33,7 +33,7 @@
 
         const Icons = {
             ElementaLogo: (p) => (
-                <img src="https://drive.google.com/uc?export=view&id=1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" {...p} />
+                <img src="https://lh3.googleusercontent.com/d/1CDtlPBzeohniETytbfVOI43VMmk_vQTn" alt="Elementa Logo" {...p} />
             ),
             Home: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
             Play: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>,
@@ -109,6 +109,24 @@
         .border-band-negra { border-color: #1f2937; color: #1f2937; box-shadow: inset 0 0 8px rgba(31, 41, 55, 0.2); }
         .border-band-roja { border-color: #ef4444; color: #ef4444; box-shadow: inset 0 0 8px rgba(239, 68, 68, 0.2); }
         .border-band-sin { border-color: #eab308; color: #eab308; box-shadow: inset 0 0 8px rgba(234, 179, 8, 0.2); }
+
+        /* ANIMACIONES ELEMENTALES PARA EL LOADER */
+        @keyframes element-pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.5; }
+            50% { transform: scale(1.3) rotate(90deg); opacity: 0.9; }
+        }
+        .orb-aura { position: absolute; width: 100%; height: 100%; border-radius: 40%; filter: blur(35px); z-index: 0; mix-blend-mode: multiply; }
+        .aura-fire { background: #ef4444; animation: element-pulse 4s ease-in-out infinite; top: -10%; left: -10%; }
+        .aura-water { background: #3b82f6; animation: element-pulse 5s ease-in-out infinite alternate; animation-delay: -1s; bottom: -10%; right: -10%; }
+        .aura-earth { background: #22c55e; animation: element-pulse 6s ease-in-out infinite; animation-delay: -2s; bottom: -10%; left: -10%; }
+        .aura-air { background: #cbd5e1; animation: element-pulse 4.5s ease-in-out infinite alternate; animation-delay: -3s; top: -10%; right: -10%; }
+        
+        @keyframes float-logo {
+            0%, 100% { transform: translateY(0); filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3)); }
+            50% { transform: translateY(-15px); filter: drop-shadow(0 30px 40px rgba(0,0,0,0.15)); }
+        }
+        .animate-float { animation: float-logo 4s ease-in-out infinite; }       
+                
         `;
 
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRNhYyhiWShaATM3XS2pvAufqmKnUlSvIrT8nLg_i9RrlSxtJXUGIJGORvaFs2QA/exec";
@@ -227,16 +245,31 @@
         };
 
         const GlobalLoader = () => (
-            <div className="fixed inset-0 z-[999999] bg-[#E5D3BD]/95 backdrop-blur-md flex flex-col items-center justify-center animate-fade-in" style={{ pointerEvents: 'all' }}>
-                <div className="relative flex items-center justify-center mb-10">
-                    <div className="absolute inset-0 bg-white/60 blur-3xl rounded-full animate-pulse scale-150"></div>
-                    <div className="absolute w-40 h-40 border-t-4 border-b-4 border-brand-dark rounded-full animate-spin"></div>
-                    <div className="absolute w-48 h-48 border-r-4 border-l-4 border-brand-dark/30 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '3s' }}></div>
-                    <img src="https://drive.google.com/uc?export=view&id=1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" className="w-32 h-32 object-contain drop-shadow-2xl animate-pulse relative z-10" />
+            <div className="fixed inset-0 z-[999999] bg-[#E5D3BD]/95 backdrop-blur-xl flex flex-col items-center justify-center animate-fade-in" style={{ pointerEvents: 'all' }}>
+                <div className="relative flex items-center justify-center mb-16 w-64 h-64 sm:w-80 sm:h-80">
+                    {/* Auras de los 4 elementos */}
+                    <div className="absolute inset-0">
+                        <div className="orb-aura aura-fire"></div>
+                        <div className="orb-aura aura-water"></div>
+                        <div className="orb-aura aura-earth"></div>
+                        <div className="orb-aura aura-air"></div>
+                    </div>
+                    {/* Logo libre sin recuadros */}
+                    {/* Contenedor que recorta la imagen a un círculo perfecto */}
+                    <div className="w-48 h-48 sm:w-64 sm:h-64 relative z-10 animate-float rounded-full overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.3)] border-4 border-[#E5D3BD]/50">
+                        <img src="https://lh3.googleusercontent.com/d/1CDtlPBzeohniETytbfVOI43VMmk_vQTn" alt="Elementa Logo" className="w-full h-full object-cover scale-[1.05]" />
+                    </div>
                 </div>
-                <div className="text-brand-dark font-black uppercase tracking-widest text-lg animate-pulse flex items-center gap-3 bg-white/80 px-8 py-3 rounded-full backdrop-blur-md shadow-xl border border-white">
-                    <div className="w-5 h-5 border-4 border-brand-dark border-t-transparent rounded-full animate-spin"></div>
-                    Sincronizando...
+                
+                <div className="text-brand-dark font-black uppercase tracking-[0.3em] text-sm animate-pulse flex flex-col items-center gap-3">
+                    <span>Sincronizando Elementos</span>
+                    {/* Puntos de colores que representan los elementos cargando */}
+                    <div className="flex gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-bounce shadow-md" style={{animationDelay: '0s'}}></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-bounce shadow-md" style={{animationDelay: '0.15s'}}></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-bounce shadow-md" style={{animationDelay: '0.3s'}}></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-slate-300 animate-bounce shadow-md" style={{animationDelay: '0.45s'}}></div>
+                    </div>
                 </div>
             </div>
         );
@@ -526,6 +559,34 @@
                 setLoading(false);
             };
 
+            const handleAddEvent = async (e) => {
+                e.preventDefault(); setLoading(true); setErrorMsg(''); setSuccessMsg('');
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+                const res = await apiCall('addEvento', data);
+                if (res.status === 'success') {
+                    setSuccessMsg('Evento publicado correctamente.');
+                    e.target.reset();
+                    loadAppData(user);
+                } else { setErrorMsg(res.message); }
+                setLoading(false);
+                setTimeout(() => setSuccessMsg(''), 3000);
+            };
+
+            const handleAddWOD = async (e) => {
+                e.preventDefault(); setLoading(true); setErrorMsg(''); setSuccessMsg('');
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+                const res = await apiCall('addWOD', data);
+                if (res.status === 'success') {
+                    setSuccessMsg('WOD registrado correctamente.');
+                    e.target.reset();
+                    loadAppData(user);
+                } else { setErrorMsg(res.message); }
+                setLoading(false);
+                setTimeout(() => setSuccessMsg(''), 3000);
+            };       
+
             const calcularDias = (fechaCaducidad) => {
                 if (!fechaCaducidad) return { texto: 'Sin fecha', color: 'text-brand-dark/50' };
                 const expDate = new Date(fechaCaducidad);
@@ -571,9 +632,10 @@
 
             const Topbar = () => (
                 <div className="sticky top-0 z-[100] bg-brand-bg1/95 backdrop-blur-xl px-6 py-4 flex justify-between items-center shadow-sm border-b border-brand-dark/10">
-                    <div className="flex items-center gap-2">
-                        <div className="bg-brand-dark p-1.5 rounded-lg shadow-lg">
-                            <ElementaLogo className="w-7 h-7 object-contain" />
+                    <div className="flex items-center gap-3">
+                        {/* Contenedor circular estricto que recorta las esquinas cuadradas */}
+                        <div className="w-10 h-10 rounded-full shadow-md overflow-hidden border border-brand-dark/10 shrink-0 bg-brand-dark flex items-center justify-center">
+                            <ElementaLogo className="w-full h-full object-cover scale-[1.10]" />
                         </div>
                         <span className="font-black text-xl tracking-widest uppercase text-brand-dark">Elementa</span>
                     </div>
@@ -675,12 +737,18 @@
                         {/* LOGIN Y REGISTRO */}
                         {!user && (currentView === 'login' || currentView === 'register') && (
                             <div className="flex flex-col items-center justify-center animate-slide-up py-10">
-                                <div className="mb-8 flex flex-col items-center">
-                                    <div className="w-24 h-24 rounded-full bg-brand-dark flex items-center justify-center shadow-2xl mb-4 border-4 border-brand-dark/10 overflow-hidden p-3">
-                                        <ElementaLogo className="w-full h-full object-contain" />
+                                <div className="mb-10 flex flex-col items-center w-full">
+                                    <div className="w-40 h-40 sm:w-48 sm:h-48 mb-6 relative flex items-center justify-center animate-float">
+                                        {/* Sombra base suave */}
+                                        <div className="absolute inset-0 bg-brand-dark/30 blur-2xl rounded-full z-0 translate-y-6 scale-90"></div>
+                                        
+                                        {/* Contenedor circular con borde del mismo color del fondo para fusionarse */}
+                                        <div className="relative z-10 w-full h-full rounded-full overflow-hidden shadow-2xl border-[6px] border-[#E5D3BD]">
+                                            <ElementaLogo className="w-full h-full object-cover scale-[1.05]" />
+                                        </div>
                                     </div>
-                                    <h1 className="text-4xl font-black uppercase tracking-widest text-brand-dark drop-shadow-sm">Elementa</h1>
-                                    <h2 className="text-xl font-medium tracking-[0.4em] text-brand-dark/70">TRAINING BOX</h2>
+                                    <h1 className="text-5xl font-black uppercase tracking-[0.2em] text-brand-dark drop-shadow-md text-center">Elementa</h1>
+                                    <h2 className="text-lg font-bold tracking-[0.5em] text-brand-dark/60 mt-2 text-center">TRAINING BOX</h2>
                                 </div>
                                 
                                 <div className="glass-card p-6 sm:p-8 rounded-[2.5rem] w-full max-w-md">
@@ -697,11 +765,11 @@
                                                     <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Apellidos</label><input type="text" name="apellidos" required pattern="^[A-Za-zÀ-ÿ\s]+$" title="Solo letras y espacios" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
-                                                    <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Cédula</label><input type="number" name="cedula" required min="10000" title="Número de documento válido" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
+                                                    <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Cédula</label><input type="number" name="cedula" required min="10000" title="Número de documento válido" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
                                                     <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Teléfono</label><input type="tel" name="telefono" required pattern="[0-9]{7,15}" title="Solo números (mínimo 7 dígitos)" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
-                                                    <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">EPS</label><input type="text" name="eps" required pattern="^[A-Za-zÀ-ÿ\s0-9]+$" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
+                                                    <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">EPS</label><input type="text" name="eps" required pattern="^[A-Za-zÀ-ÿ\s0-9]+$" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
                                                     <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Fecha Nacimiento</label><input type="date" name="fechaNac" required max={new Date().toISOString().split("T")[0]} className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
                                                 </div>
                                                 <div className="p-4 bg-brand-dark/5 rounded-xl border border-brand-dark/10 space-y-4 mt-2">
@@ -817,7 +885,7 @@
                                             </div>
                                         </div>
                                     )}
-
+                                    
                                     {skillTab === 'levantamientos' && (
                                         <div className="space-y-4 animate-fade-in">
                                             <div className="flex items-center gap-2 mb-2">
@@ -957,7 +1025,7 @@
                                     <p className="text-sm font-bold text-brand-dark/50 mt-2">Entrenamientos y Retos</p>
                                 </div>
 
-                                {dataLoading ? <Loader /> : (
+                                {dataLoading ? <div className="text-center py-10 font-bold animate-pulse text-brand-dark/50">Cargando datos...</div> : (
                                     <div className="space-y-6">
                                         {(!wodsList || wodsList.length === 0) ? (
                                             <div className="bg-white/40 p-6 rounded-2xl border border-brand-dark/10 text-center shadow-sm">
@@ -1027,7 +1095,7 @@
                                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-brand-dark/50" />
                                     <input type="text" placeholder="Buscar movimiento..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/60 focus:bg-white outline-none transition-all shadow-inner font-bold text-brand-dark" />
                                 </div>
-                                {dataLoading ? <Loader /> : (
+                                {dataLoading ? <div className="text-center py-10 font-bold animate-pulse text-brand-dark/50">Cargando datos...</div> : (
                                     <div className="space-y-4">
                                         {Object.keys(groupedFilteredVideos).map((category, catIdx) => {
                                             return (
@@ -1095,7 +1163,7 @@
                                     <h2 className="text-4xl font-black uppercase leading-none mt-1">Eventos</h2>
                                     <p className="text-sm font-bold text-brand-dark/50 mt-2">Actividades extraordinarias y comunidad</p>
                                 </div>
-                                {dataLoading ? <Loader /> : (
+                                {dataLoading ? <div className="text-center py-10 font-bold animate-pulse text-brand-dark/50">Cargando datos...</div> : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                                         {blogPosts?.map((post, idx) => {
                                             if(!post) return null;
@@ -1138,7 +1206,45 @@
                                 <div className="flex gap-2 overflow-x-auto hide-scroll px-2 pb-2">
                                     <button onClick={() => setAdminTab('evidencias')} className={`shrink-0 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${adminTab === 'evidencias' ? 'bg-brand-dark text-brand-bg1 shadow-lg' : 'glass-card text-brand-dark hover:bg-white'}`}>Validar Evidencias</button>
                                     <button onClick={() => setAdminTab('validacionPagos')} className={`shrink-0 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${adminTab === 'validacionPagos' ? 'bg-brand-dark text-brand-bg1 shadow-lg' : 'glass-card text-brand-dark hover:bg-white'}`}>Gestión Atletas</button>
+                                    <button onClick={() => setAdminTab('eventos')} className={`shrink-0 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${adminTab === 'eventos' ? 'bg-brand-dark text-brand-bg1 shadow-lg' : 'glass-card text-brand-dark hover:bg-white'}`}>Subir Evento</button>
+                                    <button onClick={() => setAdminTab('wods')} className={`shrink-0 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${adminTab === 'wods' ? 'bg-brand-dark text-brand-bg1 shadow-lg' : 'glass-card text-brand-dark hover:bg-white'}`}>Subir WOD</button>
                                 </div>
+
+                                {/* AQUI EMPIEZAN LOS NUEVOS TABS */}
+                                {adminTab === 'eventos' && (
+                                    <div className="glass-card p-4 sm:p-6 rounded-[2rem] border border-white/40">
+                                        <h3 className="text-xl font-black flex items-center gap-2 mb-4"><BookOpen className="w-5 h-5"/> Registrar Evento/Blog</h3>
+                                        {successMsg && <div className="bg-green-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{successMsg}</div>}
+                                        {errorMsg && <div className="bg-red-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{errorMsg}</div>}
+                                        <form onSubmit={handleAddEvent} className="space-y-4">
+                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Título</label><input type="text" name="Titulo" required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Fecha</label><input type="date" name="Fecha" required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Hora</label><input type="time" name="Hora" className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                            </div>
+                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Punto de Encuentro</label><input type="text" name="PuntoEncuentro" className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">URL de Imagen (Opcional)</label><input type="url" name="URL_Imagen" placeholder="https://..." className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm text-xs" /></div>
+                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Descripción</label><textarea name="Descripcion" required rows="4" className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm"></textarea></div>
+                                            <button type="submit" disabled={loading} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase shadow-xl hover:scale-105 transition-transform">{loading ? 'Subiendo...' : 'Publicar Evento'}</button>
+                                        </form>
+                                    </div>
+                                )}
+
+                                {adminTab === 'wods' && (
+                                    <div className="glass-card p-4 sm:p-6 rounded-[2rem] border border-white/40">
+                                        <h3 className="text-xl font-black flex items-center gap-2 mb-4"><Calendar className="w-5 h-5"/> Registrar WOD</h3>
+                                        {successMsg && <div className="bg-green-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{successMsg}</div>}
+                                        {errorMsg && <div className="bg-red-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{errorMsg}</div>}
+                                        <form onSubmit={handleAddWOD} className="space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Título (Ej: Lunes)</label><input type="text" name="Titulo" required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Fecha</label><input type="date" name="Fecha" required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                            </div>
+                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Descripción del WOD</label><textarea name="Descripcion" required rows="6" className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm whitespace-pre-wrap"></textarea></div>
+                                            <button type="submit" disabled={loading} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase shadow-xl hover:scale-105 transition-transform">{loading ? 'Guardando...' : 'Guardar WOD'}</button>
+                                        </form>
+                                    </div>
+                                )}
 
                                 {/* GESTIÓN DE ATLETAS (INFO PERSONAS) */}
                                 {adminTab === 'validacionPagos' && (
@@ -1147,7 +1253,7 @@
                                             <h3 className="text-xl font-black flex items-center gap-2"><Users className="w-5 h-5"/> Directorio de Atletas</h3>
                                         </div>
                                         
-                                        {dataLoading ? <Loader /> : (
+                                        {dataLoading ? <div className="text-center py-10 font-bold animate-pulse text-brand-dark/50">Cargando datos...</div> : (
                                             <div className="space-y-3">
                                                 {adminSheetData?.map((row, idx) => {
                                                     if (!row) return null;
@@ -1363,8 +1469,8 @@
                                     
                                     <div className="flex-1 overflow-y-auto hide-scroll bg-brand-bg1">
                                         {selectedPost.parsedImage && (
-                                            <div className="w-full h-64 sm:h-96 relative shadow-md bg-brand-dark">
-                                                <img src={selectedPost.parsedImage} className="w-full h-full object-cover" alt="Detalle" />
+                                            <div className="w-full relative shadow-md bg-brand-dark flex justify-center">
+                                                <img src={selectedPost.parsedImage} className="w-full h-auto max-h-[none] object-contain" alt="Detalle" />
                                             </div>
                                         )}
                                         <div className={`p-6 sm:p-12 ${!selectedPost.parsedImage ? 'pt-20' : ''}`}>
