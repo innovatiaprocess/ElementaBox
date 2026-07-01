@@ -195,7 +195,7 @@
             if (!url) return null;
             if (url.includes('drive.google.com')) {
                 const match = url.match(/[-\w]{25,}/);
-                if (match) return `https://drive.google.com/uc?export=view&id=${match[0]}`;
+                if (match) return `https://lh3.googleusercontent.com/d/${match[0]}`;
             }
             return url;
         };
@@ -242,9 +242,9 @@
 
         const GlobalLoader = () => (
             <div className="fixed inset-0 z-[99999] bg-[#E5D3BD] flex flex-col items-center justify-center animate-fade-in">
-                <video src="https://drive.google.com/uc?export=view&id=1_6UqArGQtjN-61mWhs5MoAy1QlBzZoMA" autoPlay loop muted playsInline className="w-64 h-64 object-contain mix-blend-multiply mb-6 pointer-events-none"></video>
-                <div className="text-brand-dark font-black uppercase tracking-widest text-lg animate-pulse flex items-center gap-2">
-                    <div className="w-4 h-4 border-4 border-brand-dark border-t-transparent rounded-full animate-spin"></div>
+                <video src="https://drive.google.com/uc?export=download&id=1_6UqArGQtjN-61mWhs5MoAy1QlBzZoMA" autoPlay loop muted playsInline className="w-64 h-64 object-contain mix-blend-multiply mb-6 pointer-events-none"></video>
+                <div className="text-brand-dark font-black uppercase tracking-widest text-lg animate-pulse flex items-center gap-2 bg-white/30 px-6 py-2 rounded-full backdrop-blur-sm shadow-sm">
+                    <div className="w-5 h-5 border-4 border-brand-dark border-t-transparent rounded-full animate-spin"></div>
                     Sincronizando...
                 </div>
             </div>
@@ -270,7 +270,7 @@
             const [selectedPost, setSelectedPost] = useState(null); 
             const [selectedVideo, setSelectedVideo] = useState(null); 
             const [uploadingReto, setUploadingReto] = useState(null);
-            const [previewFile, setPreviewFile] = useState(null);
+            const [previewFiles, setPreviewFiles] = useState([]);
 
             const [skillTab, setSkillTab] = useState('gimnasia'); 
             const [userSkills, setUserSkills] = useState(defaultSkills); 
@@ -421,7 +421,7 @@
             const handleSaveSkillsSilently = async () => {
                 setLoading(true); setErrorMsg(''); setSuccessMsg('');
                 const res = await apiCall('updateSkillsWithEvidence', {
-                    correo: user.correo || user.email, skills: userSkills, base64: ''
+                    correo: user.correo || user.email, skills: userSkills, archivos: []
                 });
                 if (res.status === 'success') {
                     setSuccessMsg('Progreso guardado (Las marcas inferiores no otorgan puntos ni requieren evidencia).');
@@ -432,34 +432,44 @@
             };
 
             const handleFileChange = (e) => {
-                const file = e.target.files[0];
-                if(file) { setPreviewFile({ url: URL.createObjectURL(file), type: file.type, originalFile: file }); setErrorMsg(''); } 
-                else { setPreviewFile(null); }
+                const files = Array.from(e.target.files);
+                if(files.length > 0) { 
+                    const newFiles = files.map(file => ({
+                        url: URL.createObjectURL(file),
+                        type: file.type,
+                        originalFile: file
+                    }));
+                    setPreviewFiles(prev => [...prev, ...newFiles]); 
+                    setErrorMsg(''); 
+                } 
             };
 
             const handleEvidenceSubmit = async (e) => {
                 e.preventDefault(); setLoading(true); setSuccessMsg('Procesando evidencia (puede tardar un momento)...'); setErrorMsg('');
                 try {
-                    let base64 = "";
-                    if (previewFile && previewFile.originalFile) {
-                        if(previewFile.originalFile.size > 8 * 1024 * 1024) { setErrorMsg("Archivo muy pesado (Máximo 8MB)."); setLoading(false); setSuccessMsg(''); return; }
-                        base64 = await getBase64(previewFile.originalFile);
+                    let archivos = [];
+                    if (previewFiles && previewFiles.length > 0) {
+                        for(let pf of previewFiles) {
+                            if(pf.originalFile.size > 8 * 1024 * 1024) { setErrorMsg("Un archivo es muy pesado (Máximo 8MB)."); setLoading(false); setSuccessMsg(''); return; }
+                            const b64 = await getBase64(pf.originalFile);
+                            archivos.push({ base64: b64, filename: pf.originalFile.name || 'evidencia.jpg' });
+                        }
                     }
                     
                     let res;
                     if (uploadingReto.isSkillUpdate) {
                         res = await apiCall('updateSkillsWithEvidence', {
-                            correo: user.correo || user.email, skills: userSkills, base64: base64, filename: previewFile?.originalFile?.name || 'evidencia'
+                            correo: user.correo || user.email, skills: userSkills, archivos: archivos
                         });
                     } else {
                         res = await apiCall('submitEvidence', {
-                            correo: user.correo || user.email, reto: uploadingReto.Titulo, puntos: uploadingReto.Puntos, base64: base64, filename: previewFile?.originalFile?.name || 'evidencia'
+                            correo: user.correo || user.email, reto: uploadingReto.Titulo, puntos: uploadingReto.Puntos, archivos: archivos
                         });
                     }
 
                     if (res.status === 'success') {
                         setSuccessMsg(res.message || 'Evidencia enviada a revisión.');
-                        setTimeout(() => { setUploadingReto(null); setPreviewFile(null); setSuccessMsg(''); loadAppData(user); }, 3000);
+                        setTimeout(() => { setUploadingReto(null); setPreviewFiles([]); setSuccessMsg(''); loadAppData(user); }, 3000);
                     } else { setErrorMsg(res.message || 'Error al subir la evidencia.'); setSuccessMsg(''); }
                 } catch(e) { setErrorMsg("Error al procesar el archivo."); setSuccessMsg(''); }
                 setLoading(false);
@@ -736,23 +746,23 @@
                                             </div>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                                                {movimientosGimnasia.map((mov, idx) => {
-                                                    return (
-                                                    <div key={idx} className="bg-white/60 p-3.5 sm:p-4 rounded-2xl border border-brand-dark/10 shadow-sm flex flex-col gap-3">
-                                                        <div className="flex justify-between items-start">
-                                                            <h4 className="font-black text-xs text-brand-dark uppercase tracking-wider">{mov}</h4>
-                                                            <div className="flex flex-col items-end gap-1">
-                                                                {maxSkills[mov] && maxSkills[mov] !== 'azul' && (
-                                                                    <span className="text-[8px] font-black uppercase tracking-widest text-brand-dark/40 bg-black/5 px-2 py-0.5 rounded">PR Oficial: {nivelesGimnasiaList.find(n => n.color === maxSkills[mov])?.label || 'Banda Azul'}</span>
-                                                                )}
-                                                                {pendingSkills[mov] && gimLevels.indexOf(pendingSkills[mov]) > gimLevels.indexOf(maxSkills[mov] || 'azul') && (
-                                                                    <span className="text-[8px] font-black uppercase tracking-widest text-orange-700 bg-orange-100 px-2 py-0.5 rounded border border-orange-200 flex items-center gap-1 shadow-sm">
-                                                                        <Clock className="w-2.5 h-2.5"/> En validación: {nivelesGimnasiaList.find(n => n.color === pendingSkills[mov])?.label}
-                                                                    </span>
-                                                                )}
-                                                            </div>
+                                            {movimientosGimnasia.map((mov, idx) => {
+                                                return (
+                                                <div key={idx} className="bg-white/60 p-3.5 sm:p-4 rounded-2xl border border-brand-dark/10 shadow-sm flex flex-col gap-3">
+                                                    <div className="flex justify-between items-start">
+                                                        <h4 className="font-black text-xs text-brand-dark uppercase tracking-wider">{mov}</h4>
+                                                        <div className="flex flex-col items-end gap-1 max-w-[60%] text-right">
+                                                            {maxSkills[mov] && maxSkills[mov] !== 'azul' && (
+                                                                <span className="text-[8px] font-black uppercase tracking-widest text-brand-dark/40 bg-black/5 px-2 py-0.5 rounded">PR Oficial: {nivelesGimnasiaList.find(n => n.color === maxSkills[mov])?.label || 'Banda Azul'}</span>
+                                                            )}
+                                                            {pendingSkills[mov] && gimLevels.indexOf(pendingSkills[mov]) > gimLevels.indexOf(maxSkills[mov] || 'azul') && (
+                                                                <span className="text-[8px] font-black uppercase tracking-widest text-orange-700 bg-orange-100 px-2 py-0.5 rounded border border-orange-200 flex items-center gap-1 shadow-sm leading-tight">
+                                                                    <Clock className="w-2.5 h-2.5 shrink-0"/> En validación: {nivelesGimnasiaList.find(n => n.color === pendingSkills[mov])?.label}
+                                                                </span>
+                                                            )}
                                                         </div>
-                                                        <div className="flex items-center justify-between bg-black/5 p-2 rounded-full border border-black/5 mt-1 relative">
+                                                    </div>
+                                                    <div className="flex items-center justify-between bg-black/5 p-2 rounded-full border border-black/5 mt-1 relative">
                                                             {nivelesGimnasiaList.map(nv => {
                                                                 const isActive = userSkills[mov] === nv.color;
                                                                 const isMaxOfficial = maxSkills[mov] === nv.color;
@@ -954,21 +964,27 @@
                                         <div className="pt-4 border-t-2 border-brand-dark/10">
                                             <h3 className="font-black text-xl uppercase mb-4 px-2 flex items-center gap-2"><Trophy className="w-5 h-5"/> Retos Disponibles</h3>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                {retosList?.map((reto, idx) => {
-                                                    if(!reto) return null;
-                                                    return (
-                                                    <div key={idx} className="bg-white/60 p-5 rounded-2xl border border-brand-dark/5 flex flex-col h-full shadow-sm">
-                                                        <div className="flex justify-between items-start mb-2">
-                                                            <h4 className="font-black uppercase text-sm leading-tight text-brand-dark">{getProp(reto, 'Titulo') || 'Reto'}</h4>
-                                                            <span className="bg-green-100 text-green-700 font-black text-[10px] px-2 py-1 rounded-full uppercase tracking-wider border border-green-200">+{getProp(reto, 'Puntos') || 0} Pts</span>
+                                            {retosList?.map((reto, idx) => {
+                                                if(!reto) return null;
+                                                const isAutoReto = String(getProp(reto, 'Titulo')).toLowerCase().includes('video') || String(getProp(reto, 'Titulo')).toLowerCase().includes('nivel') || String(getProp(reto, 'Titulo')).toLowerCase().includes('bandas');
+                                                return (
+                                                <div key={idx} className="bg-white/60 p-5 rounded-2xl border border-brand-dark/5 flex flex-col h-full shadow-sm">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <h4 className="font-black uppercase text-sm leading-tight text-brand-dark pr-2">{getProp(reto, 'Titulo') || 'Reto'}</h4>
+                                                        <span className="bg-green-100 text-green-700 font-black text-[10px] px-2 py-1 rounded-full uppercase tracking-wider border border-green-200 shrink-0">+{getProp(reto, 'Puntos') || 0} Pts</span>
+                                                    </div>
+                                                    <p className="text-xs font-bold text-brand-dark/60 mb-4 flex-1 leading-relaxed">{getProp(reto, 'Descripcion') || ''}</p>
+                                                    {isAutoReto ? (
+                                                        <div className="w-full bg-black/5 text-brand-dark/60 py-2.5 rounded-xl font-black text-[10px] uppercase text-center border border-black/5">
+                                                            Puntos Automáticos del Sistema
                                                         </div>
-                                                        <p className="text-xs font-bold text-brand-dark/60 mb-4 flex-1 leading-relaxed">{getProp(reto, 'Descripcion') || ''}</p>
+                                                    ) : (
                                                         <button onClick={() => setUploadingReto({ Titulo: getProp(reto, 'Titulo'), Puntos: getProp(reto, 'Puntos') })} className="w-full bg-brand-dark text-brand-bg1 py-2.5 rounded-xl font-black text-[10px] uppercase shadow-md flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform">
                                                             <Upload className="w-4 h-4"/> Subir Evidencia
                                                         </button>
-                                                    </div>
-                                                )})}
-                                            </div>
+                                                    )}
+                                                </div>
+                                            )})}
                                         </div>
                                     </div>
                                 )}
@@ -978,10 +994,40 @@
                         {/* ACADEMIA DE VIDEOS */}
                         {user && currentView === 'academy' && (
                             <div className="animate-slide-up space-y-6">
-                                <div className="px-2 mt-4">
-                                    <h2 className="text-4xl font-black uppercase leading-none mt-1">Academia</h2>
-                                    <p className="text-sm font-bold text-brand-dark/50 mt-2">Domina tu técnica con nuestros videos</p>
+                            <div className="px-2 mt-4">
+                                <h2 className="text-4xl font-black uppercase leading-none mt-1">Eventos</h2>
+                                <p className="text-sm font-bold text-brand-dark/50 mt-2">Actividades extraordinarias y comunidad</p>
+                            </div>
+                            {dataLoading ? <Loader /> : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                                    {blogPosts?.map((post, idx) => {
+                                        if(!post) return null;
+                                        const urlImg = getDirectImageUrl(getProp(post, 'URL_Imagen'));
+                                        return (
+                                            <div key={idx} onClick={() => setSelectedPost({...post, parsedImage: urlImg})} className="glass-card rounded-[1.5rem] overflow-hidden group hover:shadow-2xl transition-all duration-300 relative cursor-pointer flex flex-col border border-white/40">
+                                                {urlImg && (
+                                                    <div className="h-40 sm:h-48 w-full relative overflow-hidden bg-brand-dark">
+                                                        <img src={urlImg} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" alt="News" />
+                                                    </div>
+                                                )}
+                                                <div className="p-5 bg-white/40 flex-1 flex flex-col">
+                                                    <div className="flex justify-between items-start mb-3">
+                                                        <span className="bg-brand-dark text-brand-bg1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider">{getProp(post, 'Etiqueta') || 'Evento'}</span>
+                                                        <span className="text-[9px] font-bold text-brand-dark/50 uppercase">{formatearFecha(getProp(post, 'Fecha'))}</span>
+                                                    </div>
+                                                    <h3 className="text-lg font-black leading-tight mb-2">{getProp(post, 'Titulo') || ''}</h3>
+                                                    <p className="font-medium text-brand-dark/70 text-xs mb-4 line-clamp-2">{getProp(post, 'Descripcion Corta') || getProp(post, 'Descripcion') || ''}</p>
+                                                    <div className="mt-auto pt-3 border-t border-brand-dark/10 flex items-center justify-between">
+                                                        <span className="text-[10px] font-bold text-brand-dark/60">{getProp(post, 'Autor') || 'Elementa'}</span>
+                                                        <span className="text-[10px] font-black uppercase flex items-center">Leer más <Play className="w-3 h-3 ml-1"/></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
                                 </div>
+                            )}
+                        </div>
                                 <div className="relative">
                                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-brand-dark/50" />
                                     <input type="text" placeholder="Buscar movimiento..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/60 focus:bg-white outline-none transition-all shadow-inner font-bold text-brand-dark" />
@@ -1125,24 +1171,26 @@
                                         {successMsg && <div className="bg-green-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md animate-pulse">{successMsg}</div>}
 
                                         {adminEvalEvidencia ? (
-                                            <div className="animate-fade-in bg-white/60 p-4 sm:p-6 rounded-2xl border border-brand-dark/10">
-                                                <button onClick={() => setAdminEvalEvidencia(null)} className="text-[10px] font-black uppercase text-brand-dark/50 hover:text-brand-dark mb-4 flex items-center gap-1"><X className="w-3 h-3"/> Volver a la lista</button>
-                                                <h4 className="font-black text-xl mb-1 uppercase tracking-wider">{getProp(adminEvalEvidencia, 'Reto')}</h4>
-                                                <p className="text-sm font-bold text-brand-dark/70 mb-4">{getProp(adminEvalEvidencia, 'Correo')}</p>
-                                                
-                                                <div className="mb-6 rounded-xl overflow-hidden text-center flex flex-col items-center">
-                                                    {getProp(adminEvalEvidencia, 'URL_Evidencia') && getProp(adminEvalEvidencia, 'URL_Evidencia').indexOf('Base64') === -1 ? (
-                                                        <a href={getProp(adminEvalEvidencia, 'URL_Evidencia')} target="_blank" rel="noopener noreferrer" className="bg-blue-100 text-blue-700 px-6 py-3 rounded-full font-black text-xs uppercase hover:bg-blue-200 transition-colors flex items-center gap-2 shadow-sm border border-blue-200">
-                                                            <ExternalLink className="w-4 h-4"/> Ver Evidencia
+                                        <div className="animate-fade-in bg-white/60 p-4 sm:p-6 rounded-2xl border border-brand-dark/10">
+                                            <button onClick={() => setAdminEvalEvidencia(null)} className="text-[10px] font-black uppercase text-brand-dark/50 hover:text-brand-dark mb-4 flex items-center gap-1"><X className="w-3 h-3"/> Volver a la lista</button>
+                                            <h4 className="font-black text-xl mb-1 uppercase tracking-wider leading-tight">{getProp(adminEvalEvidencia, 'Reto')}</h4>
+                                            <p className="text-sm font-bold text-brand-dark/70 mb-4">{getProp(adminEvalEvidencia, 'Correo')}</p>
+                                            
+                                            <div className="mb-6 rounded-xl overflow-hidden text-center flex flex-col items-center gap-2">
+                                                {getProp(adminEvalEvidencia, 'URL_Evidencia') && getProp(adminEvalEvidencia, 'URL_Evidencia').indexOf('Error') === -1 && getProp(adminEvalEvidencia, 'URL_Evidencia').indexOf('Pendiente') === -1 ? (
+                                                    getProp(adminEvalEvidencia, 'URL_Evidencia').split('\n').map((lnk, idx) => (
+                                                        <a key={idx} href={lnk} target="_blank" rel="noopener noreferrer" className="bg-blue-100 text-blue-700 px-6 py-3 rounded-full font-black text-xs uppercase hover:bg-blue-200 transition-colors flex items-center gap-2 shadow-sm border border-blue-200 w-full sm:w-auto justify-center">
+                                                            <ExternalLink className="w-4 h-4"/> Ver Evidencia {idx + 1}
                                                         </a>
-                                                    ) : (
-                                                        <div className="bg-brand-dark/10 w-full h-32 rounded-xl flex items-center justify-center font-bold text-brand-dark/50 border border-brand-dark/20 border-dashed text-center px-4">
-                                                            <Camera className="w-6 h-6 mr-2 opacity-50 shrink-0"/> {getProp(adminEvalEvidencia, 'URL_Evidencia') || 'Sin Evidencia Adjunta'}
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="bg-brand-dark/10 w-full h-32 rounded-xl flex items-center justify-center font-bold text-brand-dark/50 border border-brand-dark/20 border-dashed text-center px-4">
+                                                        <Camera className="w-6 h-6 mr-2 opacity-50 shrink-0"/> {getProp(adminEvalEvidencia, 'URL_Evidencia') || 'Sin Evidencia Adjunta'}
+                                                    </div>
+                                                )}
+                                            </div>
 
-                                                <form className="space-y-4">
+                                            <form className="space-y-4">
                                                     <div>
                                                         <label className="block text-[10px] font-black uppercase mb-1">Observación al Atleta (Obligatorio si se rechaza)</label>
                                                         <select name="observacion" className="w-full p-3.5 rounded-xl bg-white font-bold outline-none border border-brand-dark/10 shadow-sm text-sm">
@@ -1191,19 +1239,51 @@
                                     <button type="button" onClick={() => {setUploadingReto(null); setPreviewFile(null); setErrorMsg(''); setSuccessMsg('');}} className="absolute top-4 right-4 bg-brand-dark/10 text-brand-dark p-2 rounded-full hover:bg-brand-dark/20"><X className="w-4 h-4" /></button>
                                     <h3 className="text-xl font-black uppercase mb-2 text-center text-brand-dark">Enviar Evidencia</h3>
                                     <p className="text-xs font-bold text-brand-dark/60 mb-6 text-center leading-tight uppercase">{uploadingReto.Titulo}</p>
-                                    
-                                    {successMsg && <div className="bg-yellow-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md animate-pulse">{successMsg}</div>}
-                                    {errorMsg && <div className="bg-red-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{errorMsg}</div>}
+                                
+                                {successMsg && <div className="bg-yellow-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md animate-pulse">{successMsg}</div>}
+                                {errorMsg && <div className="bg-red-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{errorMsg}</div>}
 
-                                    <form onSubmit={handleEvidenceSubmit} className="space-y-4">
-                                        {previewFile ? (
-                                            <div className="w-full flex flex-col items-center gap-3">
-                                                <div className="w-full h-48 bg-black/5 rounded-2xl border border-black/10 overflow-hidden flex items-center justify-center relative group">
-                                                    {previewFile.type.startsWith('video/') ? (
-                                                        <video src={previewFile.url} controls className="w-full h-full object-contain bg-black"></video>
-                                                    ) : (
-                                                        <img src={previewFile.url} className="w-full h-full object-contain" />
-                                                    )}
+                                <form onSubmit={handleEvidenceSubmit} className="space-y-4">
+                                    {previewFiles.length > 0 ? (
+                                        <div className="w-full flex flex-col items-center gap-3">
+                                            <div className="w-full h-32 bg-black/5 rounded-2xl border border-black/10 overflow-x-auto flex items-center justify-start p-2 gap-2 relative group hide-scroll">
+                                                {previewFiles.map((pf, i) => (
+                                                    <div key={i} className="min-w-[100px] h-full relative rounded-xl overflow-hidden shrink-0 bg-black shadow-sm">
+                                                        {pf.type.startsWith('video/') ? (
+                                                            <video src={pf.url} className="w-full h-full object-cover"></video>
+                                                        ) : (
+                                                            <img src={pf.url} className="w-full h-full object-cover" />
+                                                        )}
+                                                        <button type="button" onClick={() => setPreviewFiles(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-md"><X className="w-3 h-3"/></button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="flex justify-between w-full">
+                                                <button type="button" onClick={() => document.getElementById('galleryInputMulti').click()} className="text-brand-dark font-black text-[10px] uppercase px-3 py-1.5 rounded-lg border border-brand-dark/20 hover:bg-white/50">+ Agregar más</button>
+                                                <button type="button" onClick={() => setPreviewFiles([])} className="bg-black/10 text-brand-dark/60 font-black text-[10px] uppercase px-3 py-1.5 rounded-lg">Limpiar Todo</button>
+                                            </div>
+                                            <input type="file" id="galleryInputMulti" accept="image/*,video/*" multiple onChange={handleFileChange} className="hidden" />
+                                        </div>
+                                    ) : (
+                                        <div className="flex gap-3 w-full">
+                                            <button type="button" onClick={() => document.getElementById('cameraInput').click()} className="flex-1 h-32 rounded-2xl bg-white/60 border-2 border-brand-dark/20 hover:border-brand-dark transition-colors flex flex-col items-center justify-center gap-2 font-black text-brand-dark cursor-pointer shadow-sm">
+                                                <Camera className="w-8 h-8 opacity-70" />
+                                                <span className="text-[10px] uppercase tracking-wider">Tomar Foto</span>
+                                            </button>
+                                            <button type="button" onClick={() => document.getElementById('galleryInput').click()} className="flex-1 h-32 rounded-2xl bg-white/60 border-2 border-brand-dark/20 hover:border-brand-dark transition-colors flex flex-col items-center justify-center gap-2 font-black text-brand-dark cursor-pointer shadow-sm">
+                                                <Upload className="w-8 h-8 opacity-70" />
+                                                <span className="text-[10px] uppercase tracking-wider text-center">Adjuntar<br/>Imágenes</span>
+                                            </button>
+                                            <input type="file" id="cameraInput" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
+                                            <input type="file" id="galleryInput" accept="image/*" multiple onChange={handleFileChange} className="hidden" />
+                                        </div>
+                                    )}
+                                    
+                                    <button type="submit" disabled={loading || previewFiles.length === 0} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase hover:scale-105 shadow-xl transition-transform disabled:opacity-50 mt-4">{loading ? 'Procesando...' : 'Enviar a Revisión'}</button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
                                                     <button type="button" onClick={() => setPreviewFile(null)} className="absolute top-2 right-2 bg-black/50 text-white font-black text-[10px] uppercase px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">Cambiar</button>
                                                 </div>
                                             </div>
