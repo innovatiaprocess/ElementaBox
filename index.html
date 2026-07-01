@@ -32,19 +32,9 @@
         import { createRoot } from 'react-dom/client';
 
         const Icons = {
+            // El nuevo Logo oficial leído directo desde Drive
             ElementaLogo: (p) => (
-                <svg {...p} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="50" cy="50" r="46" stroke="currentColor" strokeWidth="6"/>
-                    <path d="M12 25 L88 88" stroke="currentColor" strokeWidth="6" strokeLinecap="round"/>
-                    <path d="M12 75 L88 12" stroke="currentColor" strokeWidth="6" strokeLinecap="round"/>
-                    <path d="M50 14 C58 24 64 30 64 40 C64 48 58 50 50 50 C42 50 36 48 36 40 C36 30 42 24 50 14 Z" fill="currentColor"/>
-                    <path d="M50 24 C54 30 58 34 58 40 C58 44 54 46 50 46 C46 46 42 44 42 40 C42 34 46 30 50 24 Z" fill="currentColor"/>
-                    <path d="M60 55 C70 50 78 50 85 58 C85 68 75 70 65 75 C60 77 55 75 60 55 Z" fill="currentColor"/>
-                    <path d="M65 65 C70 62 75 62 80 65 C80 68 75 70 68 70 C65 70 63 68 65 65 Z" fill="currentColor"/>
-                    <path d="M35 85 L50 60 L65 85 Z" fill="currentColor"/>
-                    <path d="M42 85 L50 72 L58 85 Z" fill="currentColor"/>
-                    <path d="M20 50 C30 45 40 45 45 50 M15 60 C25 55 35 55 40 60 M25 40 C32 37 38 37 42 40" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
-                </svg>
+                <img src="https://drive.google.com/uc?export=view&id=1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" {...p} />
             ),
             Home: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
             Play: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>,
@@ -190,12 +180,13 @@
             return { type: null, id: null };
         };
 
-        // PARSER PARA CONVERTIR ENLACES DE GOOGLE DRIVE A IMÁGENES MOSTRABLES
+        // PARSER PARA CONVERTIR ENLACES DE GOOGLE DRIVE A IMÁGENES MOSTRABLES (MEJORADO PARA EVITAR CORS)
         const getDirectImageUrl = (url) => {
             if (!url) return null;
             if (url.includes('drive.google.com')) {
                 const match = url.match(/[-\w]{25,}/);
-                if (match) return `https://drive.google.com/uc?export=view&id=${match[0]}`;
+                // lh3.googleusercontent.com funciona mejor para extraer imágenes públicas de Drive en etiquetas <img>
+                if (match) return `https://lh3.googleusercontent.com/d/${match[0]}`;
             }
             return url;
         };
@@ -240,10 +231,14 @@
             });
         };
 
+        // NUEVO CARGADOR GLOBAL CON LOGO ELEMENTA Y ANIMACIÓN TIPO NEQUI
         const GlobalLoader = () => (
-            <div className="fixed inset-0 z-[100000] bg-[#E5D3BD] flex flex-col items-center justify-center animate-fade-in pointer-events-auto">
-                <video src="https://drive.google.com/uc?export=download&id=1_6UqArGQtjN-61mWhs5MoAy1QlBzZoMA" autoPlay loop muted playsInline className="w-64 h-64 object-contain mix-blend-multiply mb-6 pointer-events-none"></video>
-                <div className="text-brand-dark font-black uppercase tracking-widest text-lg animate-pulse flex items-center gap-2 bg-white/30 px-6 py-2 rounded-full backdrop-blur-sm shadow-sm">
+            <div className="fixed inset-0 z-[100000] bg-[#E5D3BD]/95 backdrop-blur-md flex flex-col items-center justify-center animate-fade-in pointer-events-auto">
+                <div className="relative flex items-center justify-center mb-8">
+                    <div className="absolute inset-0 bg-white/40 blur-3xl rounded-full animate-pulse scale-150"></div>
+                    <img src="https://drive.google.com/uc?export=view&id=1c_KkOa4vy1oz6qc_t87m0zcAQM8DDFYH" alt="Elementa Logo" className="w-48 h-48 object-contain drop-shadow-2xl animate-bounce relative z-10" style={{ animationDuration: '2s' }} />
+                </div>
+                <div className="text-brand-dark font-black uppercase tracking-widest text-lg animate-pulse flex items-center gap-3 bg-white/60 px-8 py-3 rounded-full backdrop-blur-md shadow-xl border border-white/50">
                     <div className="w-5 h-5 border-4 border-brand-dark border-t-transparent rounded-full animate-spin"></div>
                     Sincronizando...
                 </div>
@@ -561,16 +556,18 @@
 
             const toggleCategory = (cat) => setExpandedCategories(prev => ({ ...prev, [cat]: !prev[cat] }));
 
-            // Función para renderizar botones de evidencia limpios en el Panel Admin
+            // Función para renderizar botones de evidencia limpios en el Panel Admin y soportar múltiples
             const renderEvidenceLinks = (urlStr) => {
                 if (!urlStr) return <div className="text-brand-dark/50 font-bold text-xs">Sin Evidencia Adjunta</div>;
                 if (urlStr.includes('Error')) return <div className="text-red-500 font-bold text-[10px] p-2 bg-red-100 rounded border border-red-200">Error al procesar la imagen.</div>;
                 if (urlStr === 'Generado Automático') return <div className="text-brand-dark/50 font-bold text-xs bg-black/5 px-4 py-2 rounded-xl">Validación automática del Sistema</div>;
 
-                const links = urlStr.split('\n').filter(l => l.trim() !== '');
+                const links = urlStr.split(/[\n,\|]+/).filter(l => l.trim() !== '' && l.includes('http'));
+                if (links.length === 0) return <div className="text-brand-dark/50 font-bold text-xs">Evidencia Inválida</div>;
+
                 return links.map((lnk, idx) => {
                     return (
-                        <a key={idx} href={lnk} target="_blank" rel="noopener noreferrer" className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-black text-[10px] uppercase hover:bg-blue-200 transition-colors flex items-center justify-center gap-1.5 shadow-sm border border-blue-200 shrink-0">
+                        <a key={idx} href={lnk.trim()} target="_blank" rel="noopener noreferrer" className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-black text-[10px] uppercase hover:bg-blue-200 transition-colors flex items-center justify-center gap-1.5 shadow-sm border border-blue-200 shrink-0">
                             <ExternalLink className="w-3 h-3"/> Ver Archivo {idx + 1}
                         </a>
                     );
@@ -580,7 +577,9 @@
             const Topbar = () => (
                 <div className="sticky top-0 z-[100] bg-brand-bg1/95 backdrop-blur-xl px-6 py-4 flex justify-between items-center shadow-sm border-b border-brand-dark/10">
                     <div className="flex items-center gap-2">
-                        <div className="bg-brand-dark p-2 rounded-lg shadow-lg"><ElementaLogo className="w-6 h-6 text-brand-bg1" /></div>
+                        <div className="bg-brand-dark p-1.5 rounded-lg shadow-lg">
+                            <ElementaLogo className="w-7 h-7 object-contain" />
+                        </div>
                         <span className="font-black text-xl tracking-widest uppercase text-brand-dark">Elementa</span>
                     </div>
                     {user && (
@@ -650,14 +649,14 @@
                             const labels = { home: 'Home', wod: 'WOD', academy: 'Videos', blog: 'Eventos' };
                             const Icon = icons[view];
                             return (
-                                <button key={view} onClick={() => handleNavigation(view)} className={`relative flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${isApp ? 'text-brand-bg1 scale-110' : 'text-white/50 hover:text-white/80'}`}>
+                                <button key={view} disabled={dataLoading} onClick={() => { if(!dataLoading) handleNavigation(view); }} className={`relative flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${isApp ? 'text-brand-bg1 scale-110' : 'text-white/50 hover:text-white/80'} ${dataLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                     <Icon className="w-6 h-6" />
                                     <span className="text-[9px] font-black uppercase tracking-widest">{labels[view]}</span>
                                 </button>
                             );
                         })}
                         {user?.role === 'admin' && (
-                            <button onClick={() => handleNavigation('admin')} className={`relative flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${currentView === 'admin' ? 'text-brand-bg1 scale-110' : 'text-white/50 hover:text-white/80'}`}>
+                            <button onClick={() => { if(!dataLoading) handleNavigation('admin'); }} disabled={dataLoading} className={`relative flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${currentView === 'admin' ? 'text-brand-bg1 scale-110' : 'text-white/50 hover:text-white/80'} ${dataLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                 <Database className="w-6 h-6" />
                                 <span className="text-[9px] font-black uppercase tracking-widest">Admin</span>
                             </button>
@@ -683,7 +682,9 @@
                         {!user && (currentView === 'login' || currentView === 'register') && (
                             <div className="flex flex-col items-center justify-center animate-slide-up py-10">
                                 <div className="mb-8 flex flex-col items-center">
-                                    <div className="w-24 h-24 rounded-full bg-brand-dark flex items-center justify-center shadow-2xl mb-4 border-4 border-brand-dark/10"><ElementaLogo className="w-16 h-16 text-brand-bg1" /></div>
+                                    <div className="w-24 h-24 rounded-full bg-brand-dark flex items-center justify-center shadow-2xl mb-4 border-4 border-brand-dark/10 overflow-hidden p-3">
+                                        <ElementaLogo className="w-full h-full object-contain" />
+                                    </div>
                                     <h1 className="text-4xl font-black uppercase tracking-widest text-brand-dark drop-shadow-sm">Elementa</h1>
                                     <h2 className="text-xl font-medium tracking-[0.4em] text-brand-dark/70">TRAINING BOX</h2>
                                 </div>
@@ -727,7 +728,7 @@
                                             </>
                                         )}
 
-                                        <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Contraseña</label><input type="password" name="password" required className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" placeholder="Tu contraseña" /></div>
+                                        <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Contraseña</label><input type="password" name="password" required minLength="4" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" placeholder="Tu contraseña" /></div>
                                         
                                         <button type="submit" disabled={loading} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black text-lg mt-2 hover:scale-[1.02] transition-transform shadow-xl">
                                             {loading ? 'Cargando...' : (currentView === 'login' ? 'Entrar al Box' : 'Crear Mi Cuenta')}
