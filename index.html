@@ -308,6 +308,9 @@
             const [editingPayment, setEditingPayment] = useState(null);
             const [adminEvidencias, setAdminEvidencias] = useState([]);
             const [adminEvalEvidencia, setAdminEvalEvidencia] = useState(null);
+            
+            const [editingEvent, setEditingEvent] = useState(null);
+            const [editingWOD, setEditingWOD] = useState(null);
 
             useEffect(() => {
                 const sessionUser = localStorage.getItem('elementsSessionV9');
@@ -586,6 +589,30 @@
                 setLoading(false);
                 setTimeout(() => setSuccessMsg(''), 3000);
             };       
+
+            const handleUpdateEvent = async (e) => {
+                e.preventDefault(); setLoading(true); setErrorMsg(''); setSuccessMsg('');
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+                const res = await apiCall('updateEvento', { rowIndex: editingEvent._rowIndex, data });
+                if (res.status === 'success') {
+                    setSuccessMsg('Evento actualizado correctamente.');
+                    setTimeout(() => { setEditingEvent(null); loadAppData(user); setSuccessMsg(''); }, 1500);
+                } else { setErrorMsg(res.message); }
+                setLoading(false);
+            };
+
+            const handleUpdateWOD = async (e) => {
+                e.preventDefault(); setLoading(true); setErrorMsg(''); setSuccessMsg('');
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+                const res = await apiCall('updateWOD', { rowIndex: editingWOD._rowIndex, data });
+                if (res.status === 'success') {
+                    setSuccessMsg('WOD actualizado correctamente.');
+                    setTimeout(() => { setEditingWOD(null); loadAppData(user); setSuccessMsg(''); }, 1500);
+                } else { setErrorMsg(res.message); }
+                setLoading(false);
+            };
 
             const calcularDias = (fechaCaducidad) => {
                 if (!fechaCaducidad) return { texto: 'Sin fecha', color: 'text-brand-dark/50' };
@@ -1213,36 +1240,80 @@
                                 {/* AQUI EMPIEZAN LOS NUEVOS TABS */}
                                 {adminTab === 'eventos' && (
                                     <div className="glass-card p-4 sm:p-6 rounded-[2rem] border border-white/40">
-                                        <h3 className="text-xl font-black flex items-center gap-2 mb-4"><BookOpen className="w-5 h-5"/> Registrar Evento/Blog</h3>
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="text-xl font-black flex items-center gap-2"><BookOpen className="w-5 h-5"/> {editingEvent ? 'Editar Evento' : 'Registrar Evento/Blog'}</h3>
+                                            {editingEvent && <button onClick={() => setEditingEvent(null)} className="text-[10px] bg-brand-dark/10 font-black px-3 py-1.5 rounded-lg uppercase">Cancelar Edición</button>}
+                                        </div>
                                         {successMsg && <div className="bg-green-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{successMsg}</div>}
                                         {errorMsg && <div className="bg-red-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{errorMsg}</div>}
-                                        <form onSubmit={handleAddEvent} className="space-y-4">
-                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Título</label><input type="text" name="Titulo" required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                        
+                                        <form onSubmit={editingEvent ? handleUpdateEvent : handleAddEvent} className="space-y-4">
+                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Título</label><input type="text" name="Titulo" defaultValue={editingEvent ? getProp(editingEvent, 'Titulo') : ''} required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
                                             <div className="grid grid-cols-2 gap-4">
-                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Fecha</label><input type="date" name="Fecha" required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
-                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Hora</label><input type="time" name="Hora" className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Fecha</label><input type="date" name="Fecha" defaultValue={editingEvent && getProp(editingEvent, 'Fecha') ? new Date(getProp(editingEvent, 'Fecha')).toISOString().split('T')[0] : ''} required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Hora</label><input type="time" name="Hora" defaultValue={editingEvent ? getProp(editingEvent, 'Hora') : ''} className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
                                             </div>
-                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Punto de Encuentro</label><input type="text" name="PuntoEncuentro" className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
-                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">URL de Imagen (Opcional)</label><input type="url" name="URL_Imagen" placeholder="https://..." className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm text-xs" /></div>
-                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Descripción</label><textarea name="Descripcion" required rows="4" className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm"></textarea></div>
-                                            <button type="submit" disabled={loading} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase shadow-xl hover:scale-105 transition-transform">{loading ? 'Subiendo...' : 'Publicar Evento'}</button>
+                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Punto de Encuentro</label><input type="text" name="PuntoEncuentro" defaultValue={editingEvent ? getProp(editingEvent, 'Punto de Encuentro') : ''} className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">URL de Imagen (Opcional)</label><input type="url" name="URL_Imagen" defaultValue={editingEvent ? getProp(editingEvent, 'URL_Imagen') : ''} placeholder="https://..." className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm text-xs" /></div>
+                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Descripción</label><textarea name="Descripcion" defaultValue={editingEvent ? getProp(editingEvent, 'Descripcion') : ''} required rows="4" className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm"></textarea></div>
+                                            <button type="submit" disabled={loading} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase shadow-xl hover:scale-105 transition-transform">{loading ? 'Procesando...' : (editingEvent ? 'Guardar Cambios' : 'Publicar Evento')}</button>
                                         </form>
+
+                                        {!editingEvent && (
+                                            <div className="mt-8 border-t border-brand-dark/10 pt-6">
+                                                <h4 className="text-sm font-black uppercase mb-4 text-brand-dark">Eventos Existentes</h4>
+                                                <div className="space-y-3 max-h-64 overflow-y-auto hide-scroll pr-1">
+                                                    {blogPosts?.map((post, idx) => (
+                                                        <div key={idx} className="bg-white/60 p-3 rounded-xl border border-brand-dark/10 flex justify-between items-center gap-3">
+                                                            <div className="min-w-0">
+                                                                <h5 className="font-black text-xs text-brand-dark truncate">{getProp(post, 'Titulo')}</h5>
+                                                                <span className="text-[9px] font-bold text-brand-dark/50">{formatearFecha(getProp(post, 'Fecha'))}</span>
+                                                            </div>
+                                                            <button onClick={() => setEditingEvent(post)} className="shrink-0 bg-brand-dark text-brand-bg1 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase shadow hover:scale-105">Editar</button>
+                                                        </div>
+                                                    ))}
+                                                    {(!blogPosts || blogPosts.length === 0) && <p className="text-xs font-bold text-brand-dark/50 text-center">No hay eventos registrados.</p>}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
                                 {adminTab === 'wods' && (
                                     <div className="glass-card p-4 sm:p-6 rounded-[2rem] border border-white/40">
-                                        <h3 className="text-xl font-black flex items-center gap-2 mb-4"><Calendar className="w-5 h-5"/> Registrar WOD</h3>
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="text-xl font-black flex items-center gap-2"><Calendar className="w-5 h-5"/> {editingWOD ? 'Editar WOD' : 'Registrar WOD'}</h3>
+                                            {editingWOD && <button onClick={() => setEditingWOD(null)} className="text-[10px] bg-brand-dark/10 font-black px-3 py-1.5 rounded-lg uppercase">Cancelar Edición</button>}
+                                        </div>
                                         {successMsg && <div className="bg-green-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{successMsg}</div>}
                                         {errorMsg && <div className="bg-red-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{errorMsg}</div>}
-                                        <form onSubmit={handleAddWOD} className="space-y-4">
+                                        
+                                        <form onSubmit={editingWOD ? handleUpdateWOD : handleAddWOD} className="space-y-4">
                                             <div className="grid grid-cols-2 gap-4">
-                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Título (Ej: Lunes)</label><input type="text" name="Titulo" required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
-                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Fecha</label><input type="date" name="Fecha" required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Título (Ej: Lunes)</label><input type="text" name="Titulo" defaultValue={editingWOD ? getProp(editingWOD, 'Titulo') : ''} required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
+                                                <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Fecha</label><input type="date" name="Fecha" defaultValue={editingWOD && getProp(editingWOD, 'Fecha') ? new Date(getProp(editingWOD, 'Fecha')).toISOString().split('T')[0] : ''} required className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm" /></div>
                                             </div>
-                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Descripción del WOD</label><textarea name="Descripcion" required rows="6" className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm whitespace-pre-wrap"></textarea></div>
-                                            <button type="submit" disabled={loading} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase shadow-xl hover:scale-105 transition-transform">{loading ? 'Guardando...' : 'Guardar WOD'}</button>
+                                            <div><label className="block text-[10px] font-black uppercase mb-1 ml-1 text-brand-dark">Descripción del WOD</label><textarea name="Descripcion" defaultValue={editingWOD ? getProp(editingWOD, 'Descripcion') : ''} required rows="6" className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-brand-dark shadow-sm whitespace-pre-wrap"></textarea></div>
+                                            <button type="submit" disabled={loading} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase shadow-xl hover:scale-105 transition-transform">{loading ? 'Procesando...' : (editingWOD ? 'Guardar Cambios' : 'Guardar WOD')}</button>
                                         </form>
+
+                                        {!editingWOD && (
+                                            <div className="mt-8 border-t border-brand-dark/10 pt-6">
+                                                <h4 className="text-sm font-black uppercase mb-4 text-brand-dark">WODs Existentes</h4>
+                                                <div className="space-y-3 max-h-64 overflow-y-auto hide-scroll pr-1">
+                                                    {wodsList?.map((wod, idx) => (
+                                                        <div key={idx} className="bg-white/60 p-3 rounded-xl border border-brand-dark/10 flex justify-between items-center gap-3">
+                                                            <div className="min-w-0">
+                                                                <h5 className="font-black text-xs text-brand-dark truncate">{getProp(wod, 'Titulo')}</h5>
+                                                                <span className="text-[9px] font-bold text-brand-dark/50">{formatearFecha(getProp(wod, 'Fecha'))}</span>
+                                                            </div>
+                                                            <button onClick={() => setEditingWOD(wod)} className="shrink-0 bg-brand-dark text-brand-bg1 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase shadow hover:scale-105">Editar</button>
+                                                        </div>
+                                                    ))}
+                                                    {(!wodsList || wodsList.length === 0) && <p className="text-xs font-bold text-brand-dark/50 text-center">No hay WODs registrados.</p>}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
