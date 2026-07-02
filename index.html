@@ -204,6 +204,27 @@
             return url;
         };
 
+        const getAtletaName = (correo, adminSheetDataArray) => {
+            if (!correo) return 'Atleta Desconocido';
+            const dataToSearch = adminSheetDataArray || [];
+            const atleta = dataToSearch.find(u => (getProp(u, 'Correo') || '').toLowerCase() === correo.toLowerCase() || (getProp(u, 'Correo Electrónico') || '').toLowerCase() === correo.toLowerCase());
+            return atleta ? `${getProp(atleta, 'Nombres') || ''} ${getProp(atleta, 'Apellidos') || ''}`.trim() : correo;
+        };
+
+        const timeAgo = (dateStr) => {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return '';
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return `Hace ${seconds} seg`;
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `Hace ${minutes} min`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `Hace ${hours} h`;
+            const days = Math.floor(hours / 24);
+            return `Hace ${days} d`;
+        };
+
         const formatearFecha = (fechaString) => {
             if (!fechaString) return 'N/A';
             const date = new Date(fechaString);
@@ -247,15 +268,12 @@
         const GlobalLoader = () => (
             <div className="fixed inset-0 z-[999999] bg-[#E5D3BD]/95 backdrop-blur-xl flex flex-col items-center justify-center animate-fade-in" style={{ pointerEvents: 'all' }}>
                 <div className="relative flex items-center justify-center mb-16 w-64 h-64 sm:w-80 sm:h-80">
-                    {/* Auras de los 4 elementos */}
                     <div className="absolute inset-0">
                         <div className="orb-aura aura-fire"></div>
                         <div className="orb-aura aura-water"></div>
                         <div className="orb-aura aura-earth"></div>
                         <div className="orb-aura aura-air"></div>
                     </div>
-                    {/* Logo libre sin recuadros */}
-                    {/* Contenedor que recorta la imagen a un círculo perfecto */}
                     <div className="w-48 h-48 sm:w-64 sm:h-64 relative z-10 animate-float rounded-full overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.3)] border-4 border-[#E5D3BD]/50">
                         <img src="https://lh3.googleusercontent.com/d/1CDtlPBzeohniETytbfVOI43VMmk_vQTn" alt="Elementa Logo" className="w-full h-full object-cover scale-[1.05]" />
                     </div>
@@ -263,7 +281,6 @@
                 
                 <div className="text-brand-dark font-black uppercase tracking-[0.3em] text-sm animate-pulse flex flex-col items-center gap-3">
                     <span>Sincronizando Elementos</span>
-                    {/* Puntos de colores que representan los elementos cargando */}
                     <div className="flex gap-2">
                         <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-bounce shadow-md" style={{animationDelay: '0s'}}></div>
                         <div className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-bounce shadow-md" style={{animationDelay: '0.15s'}}></div>
@@ -311,6 +328,7 @@
             
             const [editingEvent, setEditingEvent] = useState(null);
             const [editingWOD, setEditingWOD] = useState(null);
+            const [improvedSkillsUploads, setImprovedSkillsUploads] = useState([]); 
 
             useEffect(() => {
                 const sessionUser = localStorage.getItem('elementsSessionV9');
@@ -423,27 +441,40 @@
             const handleNavigation = (view) => { setCurrentView(view); window.scrollTo(0, 0); };
 
             const handleActualizarSkillsClick = () => {
-                let hasImprovements = false;
-                
+                let improvements = [];
                 for (let mov in userSkills) {
                     let nv = userSkills[mov];
                     let ov = maxSkills[mov];
                     if (gimLevels.includes(nv)) {
                         let nIdx = gimLevels.indexOf(nv);
                         let oIdx = ov ? gimLevels.indexOf(ov) : 0;
-                        if (nIdx > oIdx) hasImprovements = true;
+                        if (nIdx > oIdx) improvements.push({ mov, old: nivelesGimnasiaList.find(n=>n.color===ov)?.label || 'Banda Azul', new: nivelesGimnasiaList.find(n=>n.color===nv)?.label });
                     } else if (!isNaN(nv)) {
                         let nVal = Number(nv);
                         let oVal = Number(ov) || 0;
-                        if (nVal - oVal >= 5) hasImprovements = true;
+                        if (nVal - oVal >= 5) improvements.push({ mov, old: `${oVal} LBS`, new: `${nVal} LBS` });
                     }
                 }
 
-                if (hasImprovements) {
-                    setUploadingReto({ Titulo: 'Validación de Nuevas Marcas (PR/Niveles)', Puntos: 'Por Calcular', isSkillUpdate: true });
+                if (improvements.length > 0) {
+                    setImprovedSkillsUploads(improvements.map(i => ({...i, file: null, preview: null})));
+                    setUploadingReto({ Titulo: 'Validación de Nuevas Marcas', Puntos: 'Por Calcular', isSkillUpdate: true });
                 } else {
                     handleSaveSkillsSilently();
                 }
+            };
+
+            const handleSkillFileChange = (index, file) => {
+                setImprovedSkillsUploads(prev => {
+                    const newArr = [...prev];
+                    if (file) {
+                        newArr[index] = { ...newArr[index], file: file, preview: URL.createObjectURL(file) };
+                    } else {
+                        newArr[index] = { ...newArr[index], file: null, preview: null };
+                    }
+                    return newArr;
+                });
+                setErrorMsg('');
             };
 
             const handleSaveSkillsSilently = async () => {
@@ -476,11 +507,25 @@
                 e.preventDefault(); setLoading(true); setSuccessMsg('Procesando evidencia (puede tardar un momento)...'); setErrorMsg('');
                 try {
                     let archivos = [];
-                    if (previewFiles && previewFiles.length > 0) {
-                        for(let pf of previewFiles) {
-                            if(pf.originalFile.size > 8 * 1024 * 1024) { setErrorMsg("Un archivo es muy pesado (Máximo 8MB)."); setLoading(false); setSuccessMsg(''); return; }
-                            const b64 = await getBase64(pf.originalFile);
-                            archivos.push({ base64: b64, filename: pf.originalFile.name || 'evidencia.jpg' });
+                    if (uploadingReto?.isSkillUpdate) {
+                        const missingFiles = improvedSkillsUploads.some(img => !img.file);
+                        if(missingFiles) {
+                            setErrorMsg("Debes cargar una evidencia para CADA nueva marca.");
+                            setLoading(false); setSuccessMsg(''); return;
+                        }
+                        for(let item of improvedSkillsUploads) {
+                            if(item.file.size > 8 * 1024 * 1024) { setErrorMsg(`El archivo para ${item.mov} es muy pesado (Máximo 8MB).`); setLoading(false); setSuccessMsg(''); return; }
+                            const b64 = await getBase64(item.file);
+                            // IMPORTANTE: Aquí ahora enviamos el nombre del movimiento ("mov: item.mov")
+                            archivos.push({ mov: item.mov, base64: b64, filename: `${item.mov.replace(/ /g, '_')}_evidencia.jpg` });
+                        }
+                    } else {
+                        if (previewFiles && previewFiles.length > 0) {
+                            for(let pf of previewFiles) {
+                                if(pf.originalFile.size > 8 * 1024 * 1024) { setErrorMsg("Un archivo es muy pesado (Máximo 8MB)."); setLoading(false); setSuccessMsg(''); return; }
+                                const b64 = await getBase64(pf.originalFile);
+                                archivos.push({ base64: b64, filename: pf.originalFile.name || 'evidencia.jpg' });
+                            }
                         }
                     }
                     
@@ -497,7 +542,7 @@
 
                     if (res.status === 'success') {
                         setSuccessMsg(res.message || 'Evidencia enviada a revisión.');
-                        setTimeout(() => { setUploadingReto(null); setPreviewFiles([]); setSuccessMsg(''); loadAppData(user); }, 3000);
+                        setTimeout(() => { setUploadingReto(null); setPreviewFiles([]); setImprovedSkillsUploads([]); setSuccessMsg(''); loadAppData(user); }, 3000);
                     } else { setErrorMsg(res.message || 'Error al subir la evidencia.'); setSuccessMsg(''); }
                 } catch(e) { setErrorMsg("Error al procesar el archivo."); setSuccessMsg(''); }
                 setLoading(false);
@@ -638,6 +683,15 @@
 
             const toggleCategory = (cat) => setExpandedCategories((prev) => ({ ...prev, [cat]: !prev[cat] }));
 
+            const groupedAdminEvidencias = useMemo(() => {
+                return adminEvidencias.reduce((acc, ev) => {
+                    const c = getProp(ev, 'Correo') || getProp(ev, 'Atleta') || 'Desconocido';
+                    if(!acc[c]) acc[c] = [];
+                    acc[c].push(ev);
+                    return acc;
+                }, {});
+            }, [adminEvidencias]);
+            
             const renderEvidenceLinks = (urlStr) => {
                 if (!urlStr) return <div className="text-brand-dark/50 font-bold text-xs">Sin Evidencia Adjunta</div>;
                 if (urlStr === 'Generado Automático') return <div className="text-brand-dark/50 font-bold text-xs bg-black/5 px-4 py-2 rounded-xl">Validación automática del Sistema</div>;
@@ -660,7 +714,6 @@
             const Topbar = () => (
                 <div className="sticky top-0 z-[100] bg-brand-bg1/95 backdrop-blur-xl px-6 py-4 flex justify-between items-center shadow-sm border-b border-brand-dark/10">
                     <div className="flex items-center gap-3">
-                        {/* Contenedor circular estricto que recorta las esquinas cuadradas */}
                         <div className="w-10 h-10 rounded-full shadow-md overflow-hidden border border-brand-dark/10 shrink-0 bg-brand-dark flex items-center justify-center">
                             <ElementaLogo className="w-full h-full object-cover scale-[1.10]" />
                         </div>
@@ -766,10 +819,7 @@
                             <div className="flex flex-col items-center justify-center animate-slide-up py-10">
                                 <div className="mb-10 flex flex-col items-center w-full">
                                     <div className="w-40 h-40 sm:w-48 sm:h-48 mb-6 relative flex items-center justify-center animate-float">
-                                        {/* Sombra base suave */}
                                         <div className="absolute inset-0 bg-brand-dark/30 blur-2xl rounded-full z-0 translate-y-6 scale-90"></div>
-                                        
-                                        {/* Contenedor circular con borde del mismo color del fondo para fusionarse */}
                                         <div className="relative z-10 w-full h-full rounded-full overflow-hidden shadow-2xl border-[6px] border-[#E5D3BD]">
                                             <ElementaLogo className="w-full h-full object-cover scale-[1.05]" />
                                         </div>
@@ -1237,7 +1287,7 @@
                                     <button onClick={() => setAdminTab('wods')} className={`shrink-0 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${adminTab === 'wods' ? 'bg-brand-dark text-brand-bg1 shadow-lg' : 'glass-card text-brand-dark hover:bg-white'}`}>Subir WOD</button>
                                 </div>
 
-                                {/* AQUI EMPIEZAN LOS NUEVOS TABS */}
+                                {/* PESTAÑA DE EVENTOS */}
                                 {adminTab === 'eventos' && (
                                     <div className="glass-card p-4 sm:p-6 rounded-[2rem] border border-white/40">
                                         <div className="flex justify-between items-center mb-4">
@@ -1279,6 +1329,7 @@
                                     </div>
                                 )}
 
+                                {/* PESTAÑA DE WODS */}
                                 {adminTab === 'wods' && (
                                     <div className="glass-card p-4 sm:p-6 rounded-[2rem] border border-white/40">
                                         <div className="flex justify-between items-center mb-4">
@@ -1355,7 +1406,7 @@
                                     </div>
                                 )}
 
-                                {/* VALIDACIÓN DE EVIDENCIAS */}
+                                {/* VALIDACIÓN DE EVIDENCIAS AGRUPADAS */}
                                 {adminTab === 'evidencias' && (
                                     <div className="glass-card p-4 sm:p-6 rounded-[2rem] border border-white/40">
                                         <h3 className="text-xl font-black flex items-center gap-2 mb-6"><CheckCircle className="w-5 h-5"/> Retos y Mejoras Pendientes</h3>
@@ -1368,15 +1419,22 @@
                                                 <button onClick={() => setAdminEvalEvidencia(null)} className="text-[10px] font-black uppercase text-brand-dark/50 hover:text-brand-dark mb-4 flex items-center gap-1"><X className="w-3 h-3"/> Volver a la lista</button>
                                                 
                                                 <div className="mb-4">
-                                                    <h4 className="text-[10px] font-black uppercase text-brand-dark/50 mb-1">Detalle de Solicitud</h4>
-                                                    <div className="space-y-1.5 max-h-40 overflow-y-auto hide-scroll p-3 bg-white/50 rounded-xl border border-brand-dark/10">
-                                                        {String(getProp(adminEvalEvidencia, 'Reto') || '').split(' | ').map((line, j) => {
-                                                            return (
-                                                                <p key={j} className="text-xs font-black text-brand-dark uppercase border-b border-brand-dark/5 pb-1 last:border-0">{line}</p>
-                                                            );
-                                                        })}
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <h4 className="text-[10px] font-black uppercase text-brand-dark/50 mb-1">Detalle de Solicitud</h4>
+                                                        <span className="text-[9px] font-black uppercase text-brand-dark/50 bg-black/5 px-2 py-0.5 rounded flex items-center gap-1"><Clock className="w-3 h-3"/> {timeAgo(getProp(adminEvalEvidencia, 'Fecha'))}</span>
                                                     </div>
-                                                    <p className="text-sm font-bold text-brand-dark/70 mt-2 flex items-center gap-1"><Users className="w-4 h-4"/> {getProp(adminEvalEvidencia, 'Correo')}</p>
+                                                    <div className="space-y-1.5 max-h-40 overflow-y-auto hide-scroll p-3 bg-white/50 rounded-xl border border-brand-dark/10">
+                                                        {String(getProp(adminEvalEvidencia, 'Reto') || '').split(' | ').map((line, j) => (
+                                                            <p key={j} className="text-xs font-black text-brand-dark uppercase border-b border-brand-dark/5 pb-1 last:border-0">{line}</p>
+                                                        ))}
+                                                    </div>
+                                                    <div className="mt-3 flex items-center gap-2">
+                                                        <div className="w-8 h-8 rounded-full bg-brand-dark text-brand-bg1 flex items-center justify-center font-black text-xs">{getAtletaName(getProp(adminEvalEvidencia, 'Correo'), adminSheetData).charAt(0).toUpperCase()}</div>
+                                                        <div>
+                                                            <p className="text-sm font-black text-brand-dark uppercase leading-none">{getAtletaName(getProp(adminEvalEvidencia, 'Correo'), adminSheetData)}</p>
+                                                            <p className="text-[10px] font-bold text-brand-dark/50">{getProp(adminEvalEvidencia, 'Correo')}</p>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 
                                                 <div className="mb-6 rounded-xl overflow-hidden text-center flex flex-wrap items-center justify-center gap-2">
@@ -1387,12 +1445,8 @@
                                                     <div>
                                                         <label className="block text-[10px] font-black uppercase mb-1">Observación al Atleta (Obligatorio si se rechaza)</label>
                                                         <select name="observacion" className="w-full p-3.5 rounded-xl bg-white font-bold outline-none border border-brand-dark/10 shadow-sm text-sm">
-                                                            <option value="">-- Selecciona una Observación Prediseñada --</option>
-                                                            {OPCIONES_OBSERVACION.map((o, i) => {
-                                                                return (
-                                                                    <option key={i} value={o}>{o}</option>
-                                                                );
-                                                            })}
+                                                            <option value="">-- Selecciona una Observación --</option>
+                                                            {OPCIONES_OBSERVACION.map((o, i) => <option key={i} value={o}>{o}</option>)}
                                                         </select>
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-3 pt-4 border-t border-brand-dark/10">
@@ -1402,33 +1456,51 @@
                                                 </form>
                                             </div>
                                         ) : (
-                                            <div className="space-y-3">
+                                            <div className="space-y-4">
                                                 {(!adminEvidencias || adminEvidencias.length === 0) ? (
                                                     <p className="text-center font-bold text-brand-dark/50 py-8 bg-white/40 rounded-2xl border border-white">No hay evidencias pendientes por revisar.</p>
                                                 ) : (
-                                                    adminEvidencias.map((ev, i) => {
-                                                        if (!ev) return null;
-                                                        return (
-                                                            <div key={i} className="bg-white/60 p-4 rounded-2xl border border-brand-dark/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm">
-                                                                <div className="flex-1 min-w-0 pr-4">
-                                                                    <div className="flex items-center gap-2 mb-1.5">
-                                                                        <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-orange-100 text-orange-700`}>{getProp(ev, 'Estado') || 'Pendiente'}</span>
-                                                                        <span className="text-[10px] font-black uppercase text-brand-dark/50">{formatearFecha(getProp(ev, 'Fecha'))}</span>
+                                                    <>
+                                                        <div className="flex justify-between items-center bg-brand-dark text-brand-bg1 px-4 py-3 rounded-xl shadow-md mb-2">
+                                                            <span className="font-black text-xs uppercase tracking-widest flex items-center gap-2"><Activity className="w-4 h-4"/> Total Pendientes:</span>
+                                                            <span className="font-black text-lg bg-white/20 px-3 py-0.5 rounded-full">{adminEvidencias.length}</span>
+                                                        </div>
+                                                        
+                                                        {Object.keys(groupedAdminEvidencias).map((correo, idx) => (
+                                                            <div key={idx} className="bg-white/40 p-4 sm:p-5 rounded-[1.5rem] border border-brand-dark/10 shadow-sm space-y-3">
+                                                                <div className="flex items-center gap-3 border-b border-brand-dark/10 pb-3 mb-2">
+                                                                    <div className="w-10 h-10 rounded-full bg-brand-dark text-brand-bg1 flex items-center justify-center font-black text-lg shadow-inner">{getAtletaName(correo, adminSheetData).charAt(0).toUpperCase()}</div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <h4 className="font-black text-brand-dark text-sm uppercase leading-tight truncate">{getAtletaName(correo, adminSheetData)}</h4>
+                                                                        <span className="text-[10px] font-bold text-brand-dark/50 truncate block">{correo}</span>
                                                                     </div>
-                                                                    <div className="space-y-1 mb-1.5">
-                                                                        {String(getProp(ev, 'Reto') || 'Evidencia').split(' | ').slice(0, 2).map((line, j) => {
-                                                                            return (
-                                                                                <p key={j} className="font-black text-brand-dark text-xs leading-tight uppercase truncate">{line}</p>
-                                                                            );
-                                                                        })}
-                                                                        {String(getProp(ev, 'Reto') || '').split(' | ').length > 2 && <p className="text-[9px] font-bold text-brand-dark/40 italic">... y más cambios (+)</p>}
+                                                                    <div className="bg-orange-100 text-orange-700 font-black text-[10px] px-2 py-1 rounded-lg border border-orange-200 text-center shrink-0">
+                                                                        {groupedAdminEvidencias[correo].length} <br/>Retos
                                                                     </div>
-                                                                    <p className="text-[10px] font-bold text-brand-dark/60 flex items-center gap-1"><Users className="w-3 h-3"/> {getProp(ev, 'Correo')}</p>
                                                                 </div>
-                                                                <button onClick={() => setAdminEvalEvidencia(ev)} className="w-full sm:w-auto shrink-0 bg-brand-dark text-brand-bg1 px-4 py-2.5 rounded-xl font-black text-[10px] uppercase shadow-md hover:scale-105">Evaluar Prueba</button>
+
+                                                                <div className="space-y-2">
+                                                                    {groupedAdminEvidencias[correo].map((ev, i) => (
+                                                                        <div key={i} className="bg-white/80 p-3.5 rounded-xl border border-brand-dark/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-sm hover:shadow-md transition-shadow">
+                                                                            <div className="flex-1 min-w-0">
+                                                                                <div className="flex items-center gap-2 mb-1.5">
+                                                                                    <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-orange-100 text-orange-700`}>{getProp(ev, 'Estado') || 'Pendiente'}</span>
+                                                                                    <span className="text-[9px] font-black uppercase text-brand-dark/50 flex items-center gap-1"><Clock className="w-3 h-3"/> {timeAgo(getProp(ev, 'Fecha'))}</span>
+                                                                                </div>
+                                                                                <div className="space-y-1">
+                                                                                    {String(getProp(ev, 'Reto') || 'Evidencia').split(' | ').slice(0, 2).map((line, j) => (
+                                                                                        <p key={j} className="font-black text-brand-dark text-xs leading-tight uppercase truncate">{line}</p>
+                                                                                    ))}
+                                                                                    {String(getProp(ev, 'Reto') || '').split(' | ').length > 2 && <p className="text-[9px] font-bold text-brand-dark/40 italic">... y más cambios (+)</p>}
+                                                                                </div>
+                                                                            </div>
+                                                                            <button onClick={() => setAdminEvalEvidencia(ev)} className="w-full sm:w-auto shrink-0 bg-brand-dark text-brand-bg1 px-4 py-2 rounded-xl font-black text-[10px] uppercase shadow-md hover:scale-105 transition-transform">Evaluar (+{getProp(ev, 'Puntos') || 0})</button>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
                                                             </div>
-                                                        );
-                                                    })
+                                                        ))}
+                                                    </>
                                                 )}
                                             </div>
                                         )}
@@ -1441,7 +1513,7 @@
                         {uploadingReto && (
                             <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 modal-overlay animate-fade-in">
                                 <div className="bg-[#f0e3d1] w-full max-w-sm rounded-[2.5rem] p-6 shadow-2xl relative animate-zoom-in border border-white/20">
-                                    <button type="button" onClick={() => {setUploadingReto(null); setPreviewFiles([]); setErrorMsg(''); setSuccessMsg('');}} className="absolute top-4 right-4 z-10 bg-brand-dark/10 text-brand-dark p-2 rounded-full hover:bg-brand-dark/20"><X className="w-4 h-4" /></button>
+                                    <button type="button" onClick={() => {setUploadingReto(null); setPreviewFiles([]); setImprovedSkillsUploads([]); setErrorMsg(''); setSuccessMsg('');}} className="absolute top-4 right-4 z-10 bg-brand-dark/10 text-brand-dark p-2 rounded-full hover:bg-brand-dark/20"><X className="w-4 h-4" /></button>
                                     <h3 className="text-xl font-black uppercase mb-2 text-center text-brand-dark pr-6">Enviar Evidencia</h3>
                                     <p className="text-xs font-bold text-brand-dark/60 mb-6 text-center leading-tight uppercase">{uploadingReto.Titulo}</p>
                                     
@@ -1449,44 +1521,65 @@
                                     {errorMsg && <div className="bg-red-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{errorMsg}</div>}
 
                                     <form onSubmit={handleEvidenceSubmit} className="space-y-4">
-                                        {previewFiles.length > 0 ? (
-                                            <div className="w-full flex flex-col items-center gap-3">
-                                                <div className="w-full h-32 bg-black/5 rounded-2xl border border-black/10 overflow-x-auto flex items-center justify-start p-2 gap-2 relative group hide-scroll">
-                                                    {previewFiles.map((pf, i) => {
-                                                        return (
-                                                            <div key={i} className="min-w-[100px] h-full relative rounded-xl overflow-hidden shrink-0 bg-black shadow-sm">
-                                                                {pf.type.startsWith('video/') ? (
-                                                                    <video src={pf.url} className="w-full h-full object-cover"></video>
-                                                                ) : (
-                                                                    <img src={pf.url} className="w-full h-full object-cover" />
-                                                                )}
-                                                                <button type="button" onClick={() => setPreviewFiles(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-md"><X className="w-3 h-3"/></button>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                                <div className="flex justify-between w-full">
-                                                    <button type="button" onClick={() => document.getElementById('galleryInputMulti').click()} className="text-brand-dark font-black text-[10px] uppercase px-3 py-1.5 rounded-lg border border-brand-dark/20 hover:bg-white/50">+ Agregar más</button>
-                                                    <button type="button" onClick={() => setPreviewFiles([])} className="bg-black/10 text-brand-dark/60 font-black text-[10px] uppercase px-3 py-1.5 rounded-lg">Limpiar Todo</button>
-                                                </div>
-                                                <input type="file" id="galleryInputMulti" accept="image/*,video/*" multiple onChange={handleFileChange} className="hidden" />
+                                        {uploadingReto.isSkillUpdate ? (
+                                            <div className="space-y-3 max-h-[50vh] overflow-y-auto hide-scroll px-1 pb-2">
+                                                <p className="text-[10px] font-black uppercase text-brand-dark/60 text-center mb-2">Sube una foto/video por cada logro:</p>
+                                                {improvedSkillsUploads.map((item, idx) => (
+                                                    <div key={idx} className="bg-white/60 p-3 rounded-xl border border-brand-dark/10 flex flex-col gap-2 shadow-sm">
+                                                        <div className="flex justify-between items-start">
+                                                            <h4 className="font-black text-xs text-brand-dark uppercase leading-tight">{item.mov}</h4>
+                                                            <span className="bg-brand-dark text-brand-bg1 px-2 py-0.5 rounded text-[8px] font-black uppercase shadow-sm shrink-0 ml-2 text-right">{item.old} <br/>➔ {item.new}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            {item.preview ? (
+                                                                <div className="relative w-14 h-14 rounded-lg overflow-hidden border border-brand-dark/20 shrink-0 shadow-sm bg-black">
+                                                                    {item.file.type.startsWith('video/') ? <video src={item.preview} className="w-full h-full object-cover" /> : <img src={item.preview} className="w-full h-full object-cover" />}
+                                                                    <button type="button" onClick={() => handleSkillFileChange(idx, null)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 shadow-md"><X className="w-3 h-3"/></button>
+                                                                </div>
+                                                            ) : (
+                                                                <button type="button" onClick={() => document.getElementById(`skillFile_${idx}`).click()} className="flex-1 py-3 rounded-xl bg-white border-2 border-dashed border-brand-dark/20 hover:border-brand-dark flex items-center justify-center gap-2 font-black text-[10px] text-brand-dark uppercase transition-colors shadow-sm">
+                                                                    <Camera className="w-4 h-4 opacity-70"/> Cargar Evidencia
+                                                                </button>
+                                                            )}
+                                                            <input type="file" id={`skillFile_${idx}`} accept="image/*,video/*" className="hidden" onChange={(e) => handleSkillFileChange(idx, e.target.files[0])} />
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         ) : (
-                                            <div className="flex gap-3 w-full">
-                                                <button type="button" onClick={() => document.getElementById('cameraInput').click()} className="flex-1 h-32 rounded-2xl bg-white/60 border-2 border-brand-dark/20 hover:border-brand-dark transition-colors flex flex-col items-center justify-center gap-2 font-black text-brand-dark cursor-pointer shadow-sm">
-                                                    <Camera className="w-8 h-8 opacity-70" />
-                                                    <span className="text-[10px] uppercase tracking-wider">Tomar Foto</span>
-                                                </button>
-                                                <button type="button" onClick={() => document.getElementById('galleryInput').click()} className="flex-1 h-32 rounded-2xl bg-white/60 border-2 border-brand-dark/20 hover:border-brand-dark transition-colors flex flex-col items-center justify-center gap-2 font-black text-brand-dark cursor-pointer shadow-sm">
-                                                    <Upload className="w-8 h-8 opacity-70" />
-                                                    <span className="text-[10px] uppercase tracking-wider text-center">Adjuntar<br/>Imágenes</span>
-                                                </button>
-                                                <input type="file" id="cameraInput" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
-                                                <input type="file" id="galleryInput" accept="image/*" multiple onChange={handleFileChange} className="hidden" />
-                                            </div>
+                                            previewFiles.length > 0 ? (
+                                                <div className="w-full flex flex-col items-center gap-3">
+                                                    <div className="w-full h-32 bg-black/5 rounded-2xl border border-black/10 overflow-x-auto flex items-center justify-start p-2 gap-2 relative group hide-scroll">
+                                                        {previewFiles.map((pf, i) => (
+                                                            <div key={i} className="min-w-[100px] h-full relative rounded-xl overflow-hidden shrink-0 bg-black shadow-sm">
+                                                                {pf.type.startsWith('video/') ? <video src={pf.url} className="w-full h-full object-cover"></video> : <img src={pf.url} className="w-full h-full object-cover" />}
+                                                                <button type="button" onClick={() => setPreviewFiles(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-md"><X className="w-3 h-3"/></button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    <div className="flex justify-between w-full">
+                                                        <button type="button" onClick={() => document.getElementById('galleryInputMulti').click()} className="text-brand-dark font-black text-[10px] uppercase px-3 py-1.5 rounded-lg border border-brand-dark/20 hover:bg-white/50">+ Agregar más</button>
+                                                        <button type="button" onClick={() => setPreviewFiles([])} className="bg-black/10 text-brand-dark/60 font-black text-[10px] uppercase px-3 py-1.5 rounded-lg">Limpiar Todo</button>
+                                                    </div>
+                                                    <input type="file" id="galleryInputMulti" accept="image/*,video/*" multiple onChange={handleFileChange} className="hidden" />
+                                                </div>
+                                            ) : (
+                                                <div className="flex gap-3 w-full">
+                                                    <button type="button" onClick={() => document.getElementById('cameraInput').click()} className="flex-1 h-32 rounded-2xl bg-white/60 border-2 border-brand-dark/20 hover:border-brand-dark transition-colors flex flex-col items-center justify-center gap-2 font-black text-brand-dark cursor-pointer shadow-sm">
+                                                        <Camera className="w-8 h-8 opacity-70" />
+                                                        <span className="text-[10px] uppercase tracking-wider">Tomar Foto</span>
+                                                    </button>
+                                                    <button type="button" onClick={() => document.getElementById('galleryInput').click()} className="flex-1 h-32 rounded-2xl bg-white/60 border-2 border-brand-dark/20 hover:border-brand-dark transition-colors flex flex-col items-center justify-center gap-2 font-black text-brand-dark cursor-pointer shadow-sm">
+                                                        <Upload className="w-8 h-8 opacity-70" />
+                                                        <span className="text-[10px] uppercase tracking-wider text-center">Adjuntar<br/>Imágenes</span>
+                                                    </button>
+                                                    <input type="file" id="cameraInput" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
+                                                    <input type="file" id="galleryInput" accept="image/*" multiple onChange={handleFileChange} className="hidden" />
+                                                </div>
+                                            )
                                         )}
                                         
-                                        <button type="submit" disabled={loading || previewFiles.length === 0} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase hover:scale-105 shadow-xl transition-transform disabled:opacity-50 mt-4">{loading ? 'Procesando...' : 'Enviar a Revisión'}</button>
+                                        <button type="submit" disabled={loading || (!uploadingReto.isSkillUpdate && previewFiles.length === 0)} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase hover:scale-105 shadow-xl transition-transform disabled:opacity-50 mt-4">{loading ? 'Procesando...' : 'Enviar a Revisión'}</button>
                                     </form>
                                 </div>
                             </div>
